@@ -86,10 +86,18 @@ describe('NetDoctor Phase 1 — UI & Project Foundation', () => {
     fireEvent.click(nextBtn);
     expect(screen.getByRole('heading', { level: 2, name: /Check IP Address & DHCP Configuration/i })).toBeInTheDocument();
 
+    // Verify only the current step is highlighted in roadmap and previous step is not highlighted
+    const currentRoadmapItems = document.querySelectorAll('.roadmap-item.current');
+    expect(currentRoadmapItems.length).toBe(1);
+
     // Backtrack to Step 1
     const prevBtn = screen.getByRole('button', { name: /Previous Step/i });
     fireEvent.click(prevBtn);
     expect(screen.getByRole('heading', { level: 2, name: /Check Network Adapter & Physical Connection/i })).toBeInTheDocument();
+
+    // Verify again that only Step 1 is highlighted
+    const backtrackedCurrentItems = document.querySelectorAll('.roadmap-item.current');
+    expect(backtrackedCurrentItems.length).toBe(1);
   });
 
   it('displays the "Why are we doing this?" modal explanation without losing progress', () => {

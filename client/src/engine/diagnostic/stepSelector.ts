@@ -100,11 +100,31 @@ export class StepSelector {
 
     // 3. Terminal condition: All steps executed
     if (!nextStepId) {
-      const finalRoadmap = currentRoadmap.map((item) =>
-        item.id === currentStepId && item.status === 'CURRENT'
-          ? { ...item, status: (completedStepIds.includes(item.id) ? 'COMPLETED' : 'FAILED') as any }
-          : item
-      );
+      const finalRoadmap = currentRoadmap.map((item) => {
+        if (item.id === currentStepId) {
+          return {
+            ...item,
+            status: (completedStepIds.includes(item.id)
+              ? 'COMPLETED'
+              : skippedStepIds.includes(item.id)
+              ? 'SKIPPED'
+              : 'FAILED') as any
+          };
+        }
+        if (item.status === 'CURRENT') {
+          return {
+            ...item,
+            status: (completedStepIds.includes(item.id)
+              ? 'COMPLETED'
+              : skippedStepIds.includes(item.id)
+              ? 'SKIPPED'
+              : failedStepIds.includes(item.id)
+              ? 'FAILED'
+              : 'PENDING') as any
+          };
+        }
+        return item;
+      });
 
       return {
         nextStepId: null,
@@ -116,7 +136,7 @@ export class StepSelector {
 
     const nextStep = DIAGNOSTIC_STEPS_LIBRARY[nextStepId];
     const updatedRoadmap = currentRoadmap.map((item) => {
-      if (item.id === currentStepId && item.status === 'CURRENT') {
+      if (item.id === currentStepId) {
         return {
           ...item,
           status: (completedStepIds.includes(item.id)
@@ -128,6 +148,18 @@ export class StepSelector {
       }
       if (item.id === nextStepId) {
         return { ...item, status: 'CURRENT' as const };
+      }
+      if (item.status === 'CURRENT') {
+        return {
+          ...item,
+          status: (completedStepIds.includes(item.id)
+            ? 'COMPLETED'
+            : skippedStepIds.includes(item.id)
+            ? 'SKIPPED'
+            : failedStepIds.includes(item.id)
+            ? 'FAILED'
+            : 'PENDING') as any
+        };
       }
       return item;
     });

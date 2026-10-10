@@ -351,6 +351,37 @@ describe('Phase 4 — Interactive Diagnostic Engine', () => {
       session = engine.backtrack(session, 'step_network_adapter');
       expect(session.currentStepIndex).toBe(0);
       expect(session.activeStepId).toBe('step_network_adapter');
+      expect(session.roadmap[0].status).toBe('CURRENT');
+      expect(session.roadmap[1].status).not.toBe('CURRENT');
+    });
+
+    it('ensures only the active step has CURRENT status and previous visited steps do not remain highlighted/CURRENT', () => {
+      const engine = new DiagnosticEngine();
+      const classification = classifyProblem('wifi connection issues');
+      const context = createValidatedProblemContext({
+        rawInput: 'wifi connection issues',
+        classification,
+        selectedOS: 'windows'
+      });
+
+      let session = engine.startSession(context, 'windows', 'wifi_connection');
+      expect(session.roadmap[0].status).toBe('CURRENT');
+      expect(session.roadmap.filter((s) => s.status === 'CURRENT').length).toBe(1);
+
+      // Navigate to step 2 without submission
+      session = engine.backtrack(session, session.roadmap[1].id);
+      expect(session.currentStepIndex).toBe(1);
+      expect(session.roadmap[1].status).toBe('CURRENT');
+      expect(session.roadmap[0].status).toBe('PENDING');
+      expect(session.roadmap.filter((s) => s.status === 'CURRENT').length).toBe(1);
+
+      // Navigate to step 3 without submission
+      session = engine.backtrack(session, session.roadmap[2].id);
+      expect(session.currentStepIndex).toBe(2);
+      expect(session.roadmap[2].status).toBe('CURRENT');
+      expect(session.roadmap[0].status).toBe('PENDING');
+      expect(session.roadmap[1].status).toBe('PENDING');
+      expect(session.roadmap.filter((s) => s.status === 'CURRENT').length).toBe(1);
     });
 
     it('Resolution Verification: "No, Still Not Working" continues diagnosis', () => {

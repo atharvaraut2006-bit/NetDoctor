@@ -314,10 +314,22 @@ export class DiagnosticEngine {
     const targetIdx = session.roadmap.findIndex((r) => r.id === targetStepId);
     if (targetIdx === -1) return session;
 
-    const updatedRoadmap = session.roadmap.map((item, idx) => ({
-      ...item,
-      status: idx === targetIdx ? ('CURRENT' as const) : item.status
-    }));
+    const updatedRoadmap = session.roadmap.map((item, idx) => {
+      if (idx === targetIdx) {
+        return { ...item, status: 'CURRENT' as const };
+      }
+      if (item.status === 'CURRENT') {
+        const status = session.completedStepIds.includes(item.id)
+          ? ('COMPLETED' as const)
+          : session.failedStepIds.includes(item.id)
+          ? ('FAILED' as const)
+          : session.skippedStepIds.includes(item.id)
+          ? ('SKIPPED' as const)
+          : ('PENDING' as const);
+        return { ...item, status };
+      }
+      return item;
+    });
 
     return {
       ...session,

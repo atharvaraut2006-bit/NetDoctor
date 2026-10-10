@@ -1,8 +1,9 @@
 /**
  * NetDoctor — Global Styles & Typography Reset
+ * Premium Light Theme Enhancement
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 *,
 *::before,
@@ -23,9 +24,11 @@ body {
   font-family: var(--font-family-base);
   font-weight: var(--font-weight-regular);
   font-size: var(--font-size-base);
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--text-primary);
   background-color: var(--bg-page);
+  background-image: var(--bg-page-mesh);
+  background-attachment: fixed;
   min-height: 100vh;
 }
 
@@ -33,30 +36,33 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-base);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
-  line-height: 1.25;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
 }
 
 h1 {
-  font-size: var(--font-size-main); /* 28px */
+  font-size: var(--font-size-main);
+  font-weight: var(--font-weight-bold);
 }
 
 h2 {
-  font-size: var(--font-size-section); /* 22px */
+  font-size: var(--font-size-section);
 }
 
 h3 {
-  font-size: var(--font-size-xl); /* 19px */
+  font-size: var(--font-size-xl);
 }
 
 p {
   color: var(--text-secondary);
   font-size: var(--font-size-base);
+  line-height: 1.65;
 }
 
 a {
   color: var(--primary-blue);
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: var(--transition-fast);
 }
 
 a:hover {
@@ -71,14 +77,18 @@ button {
   border: none;
   outline: none;
   background: none;
-  transition: all 0.15s ease;
+  transition: var(--transition-base);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--primary-blue);
+  outline: 2.5px solid var(--primary-blue);
   outline-offset: 2px;
 }
 
@@ -96,21 +106,28 @@ kbd {
   font-family: var(--font-family-mono);
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar — Slim & Premium */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-page);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: #CBD5E1;
   border-radius: var(--radius-full);
+  border: 1px solid transparent;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: #94A3B8;
+}
+
+/* Selection highlight */
+::selection {
+  background-color: var(--primary-blue-subtle);
+  color: var(--primary-blue);
 }

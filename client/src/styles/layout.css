@@ -1,5 +1,6 @@
 /**
  * NetDoctor — Layout & Workspace Grid
+ * Premium Light Theme — Enhanced Layout
  */
 
 .app-container {
@@ -8,11 +9,16 @@
   flex-direction: column;
 }
 
-/* Header Styles */
+/* ============================================
+   HEADER — Frosted Glass Sticky
+   ============================================ */
 .site-header {
   height: var(--header-height);
-  background-color: var(--bg-card);
-  border-bottom: 1px solid var(--color-border);
+  background-color: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid rgba(225, 233, 245, 0.8);
+  box-shadow: var(--shadow-header);
   position: sticky;
   top: 0;
   z-index: 40;
@@ -24,7 +30,7 @@
   width: 100%;
   max-width: var(--max-width-workspace);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,18 +42,26 @@
   gap: 12px;
   cursor: pointer;
   user-select: none;
+  transition: var(--transition-base);
+}
+
+.brand-group:hover .brand-icon-wrapper {
+  transform: scale(1.06) rotate(-2deg);
+  box-shadow: 0 4px 20px var(--primary-blue-glow);
 }
 
 .brand-icon-wrapper {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-teal));
+  background: var(--brand-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-inverse);
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: var(--transition-base);
+  flex-shrink: 0;
 }
 
 .brand-text {
@@ -57,18 +71,21 @@
 
 .brand-title {
   font-size: 18px;
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--text-primary);
   line-height: 1.1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .brand-subtitle {
-  font-size: 11px;
-  font-weight: var(--font-weight-medium);
-  color: var(--secondary-teal);
+  font-size: 10.5px;
+  font-weight: var(--font-weight-semibold);
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   margin-top: 2px;
 }
 
@@ -82,97 +99,120 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: var(--radius-full);
-  background-color: var(--color-success-bg);
+  background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
   border: 1px solid var(--color-success-border);
   color: var(--color-success);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
+  box-shadow: 0 1px 4px var(--color-success-glow);
+  letter-spacing: 0.01em;
 }
 
 .status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: var(--color-success);
+  background: radial-gradient(circle, #34D399, #059669);
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+  animation: pulseGreen 2s ease-in-out infinite;
 }
 
-/* Main Content Views */
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2); }
+  50%       { box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.08); }
+}
+
+/* ============================================
+   MAIN CONTENT VIEWS
+   ============================================ */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Home Screen Layout */
+/* ============================================
+   HOME SCREEN LAYOUT
+   ============================================ */
 .home-container {
   width: 100%;
   max-width: var(--max-width-home);
   margin: 0 auto;
-  padding: 48px 24px 64px 24px;
+  padding: 56px 24px 72px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .home-hero {
   text-align: center;
-  margin-bottom: 32px;
-  max-width: 680px;
+  margin-bottom: 40px;
+  max-width: 720px;
 }
 
 .home-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: var(--radius-full);
-  background-color: var(--primary-blue-subtle);
-  border: 1px solid #DBEAFE;
-  color: var(--primary-blue);
+  background: linear-gradient(135deg, var(--primary-blue-subtle), var(--accent-indigo-subtle));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: var(--accent-indigo);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  margin-bottom: 16px;
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 20px;
+  letter-spacing: 0.01em;
 }
 
 .home-title {
   font-size: var(--font-size-main);
-  margin-bottom: 10px;
-  letter-spacing: -0.02em;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 14px;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--text-primary) 0%, #2563EB 60%, #0891B2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.15;
 }
 
 .home-description {
-  font-size: 16px;
+  font-size: 16.5px;
   color: var(--text-secondary);
+  line-height: 1.7;
 }
 
 .home-visual-section {
   width: 100%;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
 }
 
 .home-input-card {
   width: 100%;
-  margin-bottom: 36px;
+  margin-bottom: 40px;
 }
 
 .home-common-problems {
   width: 100%;
 }
 
-/* Diagnostic Workspace Layout (Two-Panel Grid) */
+/* ============================================
+   DIAGNOSTIC WORKSPACE — Two-Panel Grid
+   ============================================ */
 .workspace-container {
   width: 100%;
   max-width: var(--max-width-workspace);
   margin: 0 auto;
-  padding: 24px 24px 60px 24px;
+  padding: 28px 28px 72px 28px;
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
-  gap: 24px;
+  gap: 28px;
   align-items: start;
-  animation: fadeIn 0.25s ease-in-out;
+  animation: fadeSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .workspace-sidebar {
@@ -186,14 +226,16 @@
 .workspace-main {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
-/* Animations */
-@keyframes fadeIn {
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeSlideIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -201,25 +243,36 @@
   }
 }
 
-/* Responsive Breakpoints */
-@media (max-width: 1024px) {
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+@media (max-width: 1100px) {
   :root {
-    --sidebar-width: 290px;
+    --sidebar-width: 300px;
   }
   .workspace-container {
-    gap: 16px;
-    padding: 16px;
+    gap: 20px;
+    padding: 20px;
   }
 }
 
 @media (max-width: 860px) {
   .workspace-container {
     grid-template-columns: 1fr;
+    padding: 16px;
   }
   .workspace-sidebar {
     position: static;
   }
   .home-container {
-    padding: 28px 16px;
+    padding: 32px 20px;
+  }
+  .home-title {
+    font-size: 26px;
   }
 }

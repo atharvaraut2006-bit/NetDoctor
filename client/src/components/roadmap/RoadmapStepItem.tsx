@@ -8,7 +8,10 @@ interface RoadmapStepItemProps {
   onSelectStep: (stepId: string) => void;
 }
 
-export const RoadmapStepItem: React.FC<RoadmapStepItemProps> = ({ step, isActive: _isActive, onSelectStep }) => {
+export const RoadmapStepItem: React.FC<RoadmapStepItemProps> = ({ step, isActive, onSelectStep }) => {
+  const isCurrent = isActive;
+  const isCompleted = step.status === 'COMPLETED';
+
   const renderStatusIcon = (status: StepStatus) => {
     switch (status) {
       case 'COMPLETED':
@@ -61,18 +64,23 @@ export const RoadmapStepItem: React.FC<RoadmapStepItemProps> = ({ step, isActive
     }
   };
 
+  // If this item is not the currently active step, it must never display as CURRENT
+  const displayStatus: StepStatus = !isCurrent && step.status === 'CURRENT'
+    ? 'PENDING'
+    : step.status;
+
   return (
     <li
-      className={`roadmap-item ${step.status === 'CURRENT' ? 'current' : ''} ${step.status === 'COMPLETED' ? 'completed' : ''}`}
+      className={`roadmap-item ${isCurrent ? 'current' : ''} ${isCompleted ? 'completed' : ''}`}
       onClick={() => onSelectStep(step.id)}
       role="button"
       tabIndex={0}
     >
-      {renderStatusIcon(step.status)}
+      {renderStatusIcon(displayStatus)}
       <div className="roadmap-item-content">
         <span className="roadmap-item-title">{step.title}</span>
         <span className="roadmap-item-status-text">
-          {getStatusLabel(step.status)} {step.resultSummary ? `• ${step.resultSummary}` : ''}
+          {getStatusLabel(displayStatus)} {step.resultSummary ? `• ${step.resultSummary}` : ''}
         </span>
       </div>
     </li>
