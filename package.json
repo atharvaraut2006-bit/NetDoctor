@@ -1,0 +1,21 @@
+{
+  "name": "netdoctor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NetDoctor — Network Diagnostic and Troubleshooting System",
+  "scripts": {
+    "dev": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "test": "npm --prefix client test"
+  },
+  "keywords": [
+    "network",
+    "diagnostics",
+    "troubleshooting",
+    "dns",
+    "ipconfig",
+    "ping"
+  ],
+  "author": "NetDoctor Team",
+  "license": "ISC"
+}
