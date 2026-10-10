@@ -47,6 +47,7 @@ export interface EscalationReportData {
 }
 
 export interface FinalDiagnosticReport {
+  sessionId?: string;
   problemIdentified: string;
   categoryKey: ProblemCategoryKey;
   rootCause: string;

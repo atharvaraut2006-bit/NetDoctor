@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { VisualGuidanceConfig } from '../../knowledge/types';
 import type { OperatingSystem } from '../../types/diagnostic';
-import { LaptopIcon, WifiIcon, ServerIcon, GlobeIcon, ArrowRightIcon, InfoIcon } from '../common/Icons';
+import { LaptopIcon, WifiIcon, ServerIcon, GlobeIcon, ArrowRightIcon, InfoIcon, PlayIcon } from '../common/Icons';
 
 interface VisualGuidanceProps {
   visual: VisualGuidanceConfig;
@@ -9,6 +9,8 @@ interface VisualGuidanceProps {
 }
 
 export const VisualGuidance: React.FC<VisualGuidanceProps> = ({ visual, selectedOS = 'windows' }) => {
+  const [isSimulating, setIsSimulating] = useState(false);
+
   return (
     <div
       className="card"
@@ -31,9 +33,28 @@ export const VisualGuidance: React.FC<VisualGuidanceProps> = ({ visual, selected
             {visual.title}
           </h4>
         </div>
-        <span className="badge badge-blue" style={{ fontSize: '11px', textTransform: 'uppercase' }}>
-          Visual Guide
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            className="btn btn-outline btn-xs"
+            onClick={() => setIsSimulating(!isSimulating)}
+            title={isSimulating ? 'Stop packet flow animation' : 'Start animated packet transmission simulation'}
+            style={{
+              fontSize: '11px',
+              padding: '3px 9px',
+              color: isSimulating ? 'var(--secondary-teal)' : 'var(--text-secondary)',
+              borderColor: isSimulating ? 'var(--secondary-teal)' : 'var(--color-border)',
+              backgroundColor: isSimulating ? '#F0FDFA' : '#FFFFFF',
+              fontWeight: 600
+            }}
+          >
+            <PlayIcon size={11} color={isSimulating ? 'var(--secondary-teal)' : 'currentColor'} />
+            <span>{isSimulating ? 'Packet Flow Active' : 'Simulate Packet Flow'}</span>
+          </button>
+          <span className="badge badge-blue" style={{ fontSize: '11px', textTransform: 'uppercase' }}>
+            Visual Guide
+          </span>
+        </div>
       </div>
 
       <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '14px', lineHeight: 1.5 }}>
@@ -71,7 +92,12 @@ export const VisualGuidance: React.FC<VisualGuidanceProps> = ({ visual, selected
               Local Wi-Fi / Cable
             </span>
             <div style={{ display: 'flex', alignItems: 'center', color: 'var(--secondary-teal)' }}>
-              <div style={{ width: '40px', height: '2px', backgroundColor: 'var(--secondary-teal)' }} />
+              <div
+                className={isSimulating ? 'packet-flow-line' : ''}
+                style={{ width: '40px', height: '2px', backgroundColor: 'var(--secondary-teal)', position: 'relative' }}
+              >
+                {isSimulating && <span className="packet-pulse-dot" />}
+              </div>
               <ArrowRightIcon size={14} />
             </div>
             <span style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -94,7 +120,12 @@ export const VisualGuidance: React.FC<VisualGuidanceProps> = ({ visual, selected
               ISP Broadband (WAN)
             </span>
             <div style={{ display: 'flex', alignItems: 'center', color: '#94A3B8' }}>
-              <div style={{ width: '40px', height: '2px', backgroundColor: '#CBD5E1' }} />
+              <div
+                className={isSimulating ? 'packet-flow-line' : ''}
+                style={{ width: '40px', height: '2px', backgroundColor: '#CBD5E1', position: 'relative' }}
+              >
+                {isSimulating && <span className="packet-pulse-dot" style={{ backgroundColor: '#7C3AED', boxShadow: '0 0 6px #7C3AED' }} />}
+              </div>
               <ArrowRightIcon size={14} />
             </div>
             <span style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -138,6 +169,12 @@ export const VisualGuidance: React.FC<VisualGuidanceProps> = ({ visual, selected
           </div>
 
           <div style={{ color: 'var(--primary-blue)', display: 'flex', alignItems: 'center' }}>
+            <div
+              className={isSimulating ? 'packet-flow-line' : ''}
+              style={{ width: '24px', height: '2px', backgroundColor: 'var(--primary-blue)', position: 'relative' }}
+            >
+              {isSimulating && <span className="packet-pulse-dot" style={{ backgroundColor: 'var(--primary-blue)', boxShadow: '0 0 6px var(--primary-blue)' }} />}
+            </div>
             <ArrowRightIcon size={16} />
           </div>
 
@@ -151,6 +188,12 @@ export const VisualGuidance: React.FC<VisualGuidanceProps> = ({ visual, selected
           </div>
 
           <div style={{ color: 'var(--secondary-teal)', display: 'flex', alignItems: 'center' }}>
+            <div
+              className={isSimulating ? 'packet-flow-line' : ''}
+              style={{ width: '24px', height: '2px', backgroundColor: 'var(--secondary-teal)', position: 'relative' }}
+            >
+              {isSimulating && <span className="packet-pulse-dot" />}
+            </div>
             <ArrowRightIcon size={16} />
           </div>
 
@@ -164,6 +207,12 @@ export const VisualGuidance: React.FC<VisualGuidanceProps> = ({ visual, selected
           </div>
 
           <div style={{ color: '#16A34A', display: 'flex', alignItems: 'center' }}>
+            <div
+              className={isSimulating ? 'packet-flow-line' : ''}
+              style={{ width: '24px', height: '2px', backgroundColor: '#16A34A', position: 'relative' }}
+            >
+              {isSimulating && <span className="packet-pulse-dot" style={{ backgroundColor: '#16A34A', boxShadow: '0 0 6px #16A34A' }} />}
+            </div>
             <ArrowRightIcon size={16} />
           </div>
 
@@ -250,7 +299,12 @@ export const VisualGuidance: React.FC<VisualGuidanceProps> = ({ visual, selected
               Layer 1 Physical Link
             </span>
             <div style={{ display: 'flex', alignItems: 'center', color: 'var(--secondary-teal)', margin: '4px 0' }}>
-              <div style={{ width: '50px', height: '2px', backgroundColor: 'var(--secondary-teal)' }} />
+              <div
+                className={isSimulating ? 'packet-flow-line' : ''}
+                style={{ width: '50px', height: '2px', backgroundColor: 'var(--secondary-teal)', position: 'relative' }}
+              >
+                {isSimulating && <span className="packet-pulse-dot" />}
+              </div>
               <ArrowRightIcon size={14} />
             </div>
             <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
@@ -298,6 +352,30 @@ export const VisualGuidance: React.FC<VisualGuidanceProps> = ({ visual, selected
           )}
         </div>
       )}
+
+      {isSimulating && (
+        <div
+          style={{
+            marginTop: '12px',
+            padding: '8px 12px',
+            backgroundColor: '#F0FDFA',
+            border: '1px solid #99F6E4',
+            borderRadius: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '12px',
+            color: '#0F766E'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="pulse-indicator" style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0D9488', display: 'inline-block' }} />
+            <span><b>Live Packet Simulation:</b> Transmitting test datagrams across active network interface</span>
+          </div>
+          <span style={{ fontSize: '11px', fontFamily: 'monospace', color: '#0F766E' }}>RTT: 2ms • Loss: 0%</span>
+        </div>
+      )}
     </div>
   );
 };
+

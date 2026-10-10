@@ -182,3 +182,26 @@ export const ImageIcon: React.FC<IconProps> = ({ size = 16, className = '', colo
     <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
   </svg>
 );
+
+export const PrinterIcon: React.FC<IconProps> = ({ size = 16, className = '', color = 'currentColor', style }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+    <polyline points="6 9 6 2 18 2 18 9" />
+    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+    <rect width="12" height="8" x="6" y="14" />
+  </svg>
+);
+
+export const PlayIcon: React.FC<IconProps> = ({ size = 16, className = '', color = 'currentColor', style }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+);
+
+export const HistoryIcon: React.FC<IconProps> = ({ size = 16, className = '', color = 'currentColor', style }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+    <polyline points="12 7 12 12 15 15" />
+  </svg>
+);
+

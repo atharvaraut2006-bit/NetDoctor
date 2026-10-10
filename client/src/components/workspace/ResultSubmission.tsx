@@ -8,8 +8,75 @@ import {
   ArrowRightIcon,
   ImageIcon,
   UploadIcon,
-  XIcon
+  XIcon,
+  ActivityIcon
 } from '../common/Icons';
+
+export function getSampleOutput(stepId: string, outcome: 'SUCCESS' | 'FAILURE' | 'JITTER'): string {
+  // Step: Check Network Adapter
+  if (stepId === 'step_network_adapter') {
+    if (outcome === 'SUCCESS') {
+      return `Admin State    State          Type             Interface Name\n-------------------------------------------------------------------------\nEnabled        Connected      Dedicated        Wi-Fi\nEnabled        Connected      Dedicated        Ethernet`;
+    }
+    if (outcome === 'FAILURE') {
+      return `Admin State    State          Type             Interface Name\n-------------------------------------------------------------------------\nDisabled       Disconnected   Dedicated        Wi-Fi`;
+    }
+    return `Admin State    State          Type             Interface Name\n-------------------------------------------------------------------------\nEnabled        Connected      Dedicated        Wi-Fi`;
+  }
+
+  // Step: Check IP Address & DHCP
+  if (stepId === 'step_ip_dhcp') {
+    if (outcome === 'SUCCESS') {
+      return `Windows IP Configuration\n\nWireless LAN adapter Wi-Fi:\n   Connection-specific DNS Suffix  . : home\n   IPv4 Address. . . . . . . . . . . : 192.168.1.145\n   Subnet Mask . . . . . . . . . . . : 255.255.255.0\n   Default Gateway . . . . . . . . . : 192.168.1.1`;
+    }
+    if (outcome === 'FAILURE') {
+      return `Windows IP Configuration\n\nWireless LAN adapter Wi-Fi:\n   Connection-specific DNS Suffix  . :\n   Autoconfiguration IPv4 Address. . : 169.254.142.88\n   Subnet Mask . . . . . . . . . . . : 255.255.0.0\n   Default Gateway . . . . . . . . . :`;
+    }
+    return `Windows IP Configuration\n\nWireless LAN adapter Wi-Fi:\n   Connection-specific DNS Suffix  . : home\n   IPv4 Address. . . . . . . . . . . : 192.168.1.145\n   Subnet Mask . . . . . . . . . . . : 255.255.255.0\n   Default Gateway . . . . . . . . . : 192.168.1.1`;
+  }
+
+  // Step: Gateway Ping
+  if (stepId === 'step_gateway_ping') {
+    if (outcome === 'SUCCESS') {
+      return `Pinging 192.168.1.1 with 32 bytes of data:\nReply from 192.168.1.1: bytes=32 time=1ms TTL=64\nReply from 192.168.1.1: bytes=32 time=2ms TTL=64\nReply from 192.168.1.1: bytes=32 time=1ms TTL=64\nReply from 192.168.1.1: bytes=32 time=1ms TTL=64\n\nPing statistics for 192.168.1.1:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),\nApproximate round trip times in milli-seconds:\n    Minimum = 1ms, Maximum = 2ms, Average = 1ms`;
+    }
+    if (outcome === 'FAILURE') {
+      return `Pinging 192.168.1.1 with 32 bytes of data:\nRequest timed out.\nRequest timed out.\nRequest timed out.\nRequest timed out.\n\nPing statistics for 192.168.1.1:\n    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),`;
+    }
+    return `Pinging 192.168.1.1 with 32 bytes of data:\nReply from 192.168.1.1: bytes=32 time=2ms TTL=64\nRequest timed out.\nReply from 192.168.1.1: bytes=32 time=180ms TTL=64\nReply from 192.168.1.1: bytes=32 time=3ms TTL=64\n\nPing statistics for 192.168.1.1:\n    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),\nApproximate round trip times in milli-seconds:\n    Minimum = 2ms, Maximum = 180ms, Average = 61ms`;
+  }
+
+  // Step: Ping Public IP (8.8.8.8)
+  if (stepId === 'step_ping_public_ip') {
+    if (outcome === 'SUCCESS') {
+      return `Pinging 8.8.8.8 with 32 bytes of data:\nReply from 8.8.8.8: bytes=32 time=14ms TTL=115\nReply from 8.8.8.8: bytes=32 time=13ms TTL=115\nReply from 8.8.8.8: bytes=32 time=15ms TTL=115\nReply from 8.8.8.8: bytes=32 time=14ms TTL=115\n\nPing statistics for 8.8.8.8:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),\nApproximate round trip times in milli-seconds:\n    Minimum = 13ms, Maximum = 15ms, Average = 14ms`;
+    }
+    if (outcome === 'FAILURE') {
+      return `Pinging 8.8.8.8 with 32 bytes of data:\nRequest timed out.\nRequest timed out.\nRequest timed out.\nRequest timed out.\n\nPing statistics for 8.8.8.8:\n    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),`;
+    }
+    return `Pinging 8.8.8.8 with 32 bytes of data:\nReply from 8.8.8.8: bytes=32 time=16ms TTL=115\nReply from 8.8.8.8: bytes=32 time=240ms TTL=115\nRequest timed out.\nReply from 8.8.8.8: bytes=32 time=150ms TTL=115\n\nPing statistics for 8.8.8.8:\n    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),\nApproximate round trip times in milli-seconds:\n    Minimum = 16ms, Maximum = 240ms, Average = 135ms`;
+  }
+
+  // Step: DNS Resolution / Flush
+  if (stepId === 'step_dns_resolution' || stepId === 'step_dns_cache_flush') {
+    if (outcome === 'SUCCESS') {
+      return `Server:  dns.google\nAddress:  8.8.8.8\n\nNon-authoritative answer:\nName:    google.com\nAddresses:  142.250.190.46`;
+    }
+    if (outcome === 'FAILURE') {
+      return `Server:  UnKnown\nAddress:  192.168.1.1\n\n*** UnKnown can't find google.com: Server failed\nDNS request timed out.\n    timeout was 2 seconds.`;
+    }
+    return `Server:  dns.google\nAddress:  8.8.8.8\n\nDNS request timed out.\n    timeout was 2 seconds.\nNon-authoritative answer:\nName:    google.com\nAddresses:  142.250.190.46`;
+  }
+
+  // Generic fallback for any other diagnostic test step
+  if (outcome === 'SUCCESS') {
+    return `Pinging target with 32 bytes of data:\nReply from target: bytes=32 time=12ms TTL=64\nReply from target: bytes=32 time=11ms TTL=64\nReply from target: bytes=32 time=14ms TTL=64\nReply from target: bytes=32 time=12ms TTL=64\n\nPing statistics for target:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),\nApproximate round trip times in milli-seconds:\n    Minimum = 11ms, Maximum = 14ms, Average = 12ms`;
+  }
+  if (outcome === 'FAILURE') {
+    return `Pinging target with 32 bytes of data:\nRequest timed out.\nRequest timed out.\nRequest timed out.\nRequest timed out.\n\nPing statistics for target:\n    Packets: Sent = 4, Received = 0, Lost = 4 (100% loss),`;
+  }
+  return `Pinging target with 32 bytes of data:\nReply from target: bytes=32 time=15ms TTL=64\nRequest timed out.\nReply from target: bytes=32 time=220ms TTL=64\nReply from target: bytes=32 time=18ms TTL=64\n\nPing statistics for target:\n    Packets: Sent = 4, Received = 3, Lost = 1 (25% loss),\nApproximate round trip times in milli-seconds:\n    Minimum = 15ms, Maximum = 220ms, Average = 84ms`;
+}
 
 interface ResultSubmissionProps {
   stepId: string;
@@ -246,10 +313,45 @@ export const ResultSubmission: React.FC<ResultSubmissionProps> = ({
       {/* Tab 2: Paste Output */}
       {activeTab === 'OUTPUT' && (
         <form onSubmit={handlePasteSubmit} className="paste-output-form">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
             <label htmlFor="terminal-output-area" style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-              Paste the raw output copied from your Command Prompt or Terminal:
+              Paste raw terminal output or generate authentic test scenarios:
             </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} role="group" aria-label="CLI Simulation Generators">
+              <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                Simulator:
+              </span>
+              <button
+                type="button"
+                className="btn btn-outline btn-xs"
+                onClick={() => setPastedOutput(getSampleOutput(stepId, 'SUCCESS'))}
+                title="Populate authentic successful command output"
+                style={{ fontSize: '11px', padding: '3px 8px', color: 'var(--color-success)', borderColor: '#A7F3D0', backgroundColor: '#F0FDF4' }}
+              >
+                <CheckIcon size={12} />
+                <span>Success</span>
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline btn-xs"
+                onClick={() => setPastedOutput(getSampleOutput(stepId, 'FAILURE'))}
+                title="Populate authentic failure or timeout command output"
+                style={{ fontSize: '11px', padding: '3px 8px', color: 'var(--color-error)', borderColor: '#FECACA', backgroundColor: '#FEF2F2' }}
+              >
+                <AlertTriangleIcon size={12} />
+                <span>100% Loss</span>
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline btn-xs"
+                onClick={() => setPastedOutput(getSampleOutput(stepId, 'JITTER'))}
+                title="Populate authentic jitter / intermittent packet loss output"
+                style={{ fontSize: '11px', padding: '3px 8px', color: '#D97706', borderColor: '#FDE68A', backgroundColor: '#FFFBEB' }}
+              >
+                <ActivityIcon size={12} />
+                <span>Jitter / High Latency</span>
+              </button>
+            </div>
           </div>
           <textarea
             id="terminal-output-area"

@@ -4,7 +4,7 @@
  */
 
 import type { ProblemCategoryKey } from '../engine/types';
-import type { VisualGuidanceConfig, StepSafetyConfig } from '../knowledge/types';
+import type { VisualGuidanceConfig, StepSafetyConfig, DiagnosticLayer } from '../knowledge/types';
 
 export type OperatingSystem = 'windows' | 'macos' | 'linux' | 'other';
 
@@ -19,6 +19,7 @@ export interface DiagnosticStep {
   stepNumber: number;
   title: string;
   category: string;
+  layer?: DiagnosticLayer;
   whyNeeded: string;
   detailedWhy: string;
   instructions: {

@@ -211,6 +211,7 @@ export const DiagnosticProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       stepNumber: idx + 1,
       title: def.title,
       category: def.layer,
+      layer: def.layer,
       whyNeeded: def.whyNeeded,
       detailedWhy: def.detailedWhy,
       instructions: def.instructions,
@@ -253,6 +254,7 @@ export const DiagnosticProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       stepNumber: idx + 1,
       title: def.title,
       category: def.layer,
+      layer: def.layer,
       whyNeeded: def.whyNeeded,
       detailedWhy: def.detailedWhy,
       instructions: def.instructions,
@@ -388,6 +390,7 @@ export const DiagnosticProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setView('RESOLUTION');
     } else if (decision.type === 'UNSUPPORTED_OR_ESCALATE' && decision.escalationData) {
       const finalReport: FinalDiagnosticReport = {
+        sessionId: session.sessionId,
         problemIdentified: session.initialProblemText || session.categoryDisplayName,
         categoryKey: session.categoryKey,
         rootCause: decision.escalationData.title,
@@ -491,6 +494,7 @@ export const DiagnosticProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     stepNumber: 1,
     title: 'Check Network Adapter',
     category: 'Physical / Data Link',
+    layer: 'Physical / Data Link' as const,
     whyNeeded: 'Verifies network adapter link state.',
     detailedWhy: 'Checks if network card is enabled and linked.',
     instructions: { windows: [], macos: [], linux: [] },

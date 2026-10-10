@@ -23,6 +23,14 @@ interface StepViewerProps {
   lastInterpretation: string | null;
 }
 
+const OSI_STACK = [
+  { key: 'L1/L2', label: 'Physical & Link', matchText: 'physical' },
+  { key: 'L3', label: 'Network (IP / Gateway)', matchText: 'network' },
+  { key: 'L4', label: 'Transport & Latency', matchText: 'transport' },
+  { key: 'L7-DNS', label: 'DNS Name Translation', matchText: 'dns' },
+  { key: 'L7-APP', label: 'Application & Web', matchText: 'application' }
+];
+
 export const StepViewer: React.FC<StepViewerProps> = ({
   step,
   selectedOS,
@@ -38,7 +46,7 @@ export const StepViewer: React.FC<StepViewerProps> = ({
   onNextStep,
   lastInterpretation
 }) => {
-  const { discoveredConfig, updateDiscoveredConfig, submissions, roadmap, verifyResolution } = useDiagnostic();
+  const { discoveredConfig, updateDiscoveredConfig, submissions, roadmap, verifyResolution, steps } = useDiagnostic();
 
   const osKey = selectedOS === 'other' ? 'windows' : selectedOS;
   let rawInstructions = step.instructions[osKey] || step.instructions.windows;
@@ -83,6 +91,91 @@ export const StepViewer: React.FC<StepViewerProps> = ({
             <HelpCircleIcon size={15} />
             <span>Why this step?</span>
           </button>
+        </div>
+
+        {/* OSI Diagnostic Stack Radar */}
+        <div
+          style={{
+            marginBottom: '16px',
+            padding: '10px 14px',
+            backgroundColor: '#F8FAFC',
+            border: '1px solid #E2E8F0',
+            borderRadius: '6px'
+          }}
+          aria-label="OSI Diagnostic Layer Radar"
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              OSI Diagnostic Stack • Bottom-Up Methodology
+            </span>
+            <span style={{ fontSize: '11.5px', color: 'var(--primary-blue)', fontWeight: 600 }}>
+              Active: {step.layer || step.category}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {OSI_STACK.map((layerItem) => {
+              const currentCategory = (step.layer || step.category || '').toLowerCase();
+              const isCurrent = currentCategory.includes(layerItem.matchText) ||
+                (layerItem.matchText === 'physical' && currentCategory.includes('local lan'));
+              const isCompleted = !isCurrent && roadmap.some((r) => {
+                if (r.status !== 'COMPLETED') return false;
+                const matchStep = steps.find((s) => s.id === r.id);
+                const sCat = (matchStep?.layer || matchStep?.category || '').toLowerCase();
+                return sCat.includes(layerItem.matchText);
+              });
+
+              let badgeBg = '#FFFFFF';
+              let badgeBorder = '#E2E8F0';
+              let textColor = 'var(--text-secondary)';
+              let fontWeight = 500;
+
+              if (isCurrent) {
+                badgeBg = '#EFF6FF';
+                badgeBorder = 'var(--primary-blue)';
+                textColor = 'var(--primary-blue)';
+                fontWeight = 600;
+              } else if (isCompleted) {
+                badgeBg = '#ECFDF5';
+                badgeBorder = '#A7F3D0';
+                textColor = 'var(--color-success)';
+                fontWeight = 500;
+              }
+
+              return (
+                <div
+                  key={layerItem.key}
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: '120px',
+                    padding: '5px 9px',
+                    borderRadius: '5px',
+                    backgroundColor: badgeBg,
+                    border: `1.5px solid ${badgeBorder}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontSize: '11px',
+                    color: textColor,
+                    fontWeight
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '10px' }}>
+                      {layerItem.key}
+                    </span>
+                    <span>{layerItem.label}</span>
+                  </div>
+                  {isCurrent && (
+                    <span className="pulse-indicator" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--primary-blue)' }} />
+                  )}
+                  {isCompleted && (
+                    <CheckIcon size={12} color="var(--color-success)" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Objective summary highlight bar */}

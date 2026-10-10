@@ -457,6 +457,7 @@ export class DiagnosticEngine {
         .map((s) => DIAGNOSTIC_STEPS_LIBRARY[s.stepId]?.title || s.stepId);
 
       const finalReport: FinalDiagnosticReport = {
+        sessionId: session.sessionId,
         problemIdentified: session.initialProblemText || session.categoryDisplayName,
         categoryKey: session.categoryKey,
         rootCause: rootCause.rootCause,
@@ -487,6 +488,7 @@ export class DiagnosticEngine {
     if (remainingSteps.length === 0) {
       const escalation = this.generateEscalationReport(session);
       const finalReport: FinalDiagnosticReport = {
+        sessionId: session.sessionId,
         problemIdentified: session.initialProblemText || session.categoryDisplayName,
         categoryKey: session.categoryKey,
         rootCause: 'Unresolved Network Impairment (Escalation Required)',

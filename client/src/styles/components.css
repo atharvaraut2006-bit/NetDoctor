@@ -1805,3 +1805,129 @@
   border: 1px solid var(--color-error-border);
 }
 
+/* ============================================
+   EXTRA SMALL BUTTON (.btn-xs)
+   ============================================ */
+.btn-xs {
+  padding: 3px 8px;
+  font-size: 11px;
+  border-radius: var(--radius-sm);
+  gap: 4px;
+  line-height: 1.4;
+}
+
+/* ============================================
+   ANIMATED PACKET FLOW & PULSE INDICATORS
+   ============================================ */
+@keyframes packet-dot-flow {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.2;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(250%);
+    opacity: 0.2;
+  }
+}
+
+.packet-flow-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.packet-pulse-dot {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--secondary-teal);
+  box-shadow: 0 0 6px var(--secondary-teal);
+  animation: packet-dot-flow 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pulse-scale-glow {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+}
+
+.pulse-indicator {
+  display: inline-block;
+  animation: pulse-scale-glow 1.8s ease-in-out infinite;
+}
+
+/* ============================================
+   PRINT / PDF EXPORT STYLES
+   ============================================ */
+.print-only-header {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 15mm;
+    size: A4 portrait;
+  }
+
+  body {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    font-size: 11pt !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-hide,
+  .app-header,
+  header,
+  nav,
+  .navbar,
+  .sidebar,
+  .roadmap-sidebar,
+  button:not(.print-allow) {
+    display: none !important;
+  }
+
+  .print-only-header {
+    display: block !important;
+  }
+
+  .resolution-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #CBD5E1 !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 14px !important;
+    padding: 16px !important;
+  }
+
+  .audit-ledger-card {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+
+

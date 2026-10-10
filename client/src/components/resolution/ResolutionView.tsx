@@ -17,7 +17,8 @@ import {
   ArrowRightIcon,
   ServerIcon,
   CopyIcon,
-  CheckCheckIcon
+  CheckCheckIcon,
+  PrinterIcon
 } from '../common/Icons';
 
 
@@ -184,6 +185,21 @@ export const ResolutionView: React.FC<ResolutionViewProps> = ({
 
   return (
     <div className="resolution-container" style={{ maxWidth: '880px', margin: '0 auto', padding: '24px 16px' }}>
+      {/* Official Print Header (Visible only when printed) */}
+      <div className="print-only-header" style={{ marginBottom: '24px', borderBottom: '2px solid #0284C7', paddingBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#0F172A', margin: 0 }}>NetDoctor Diagnostic System</h1>
+            <p style={{ fontSize: '12px', color: '#64748B', margin: '2px 0 0 0' }}>Official Network Incident Audit & Diagnostic Resolution Certificate</p>
+          </div>
+          <div style={{ textAlign: 'right', fontSize: '11px', color: '#64748B' }}>
+            <div>Date: {new Date(finalReport.resolvedAt).toLocaleDateString()}</div>
+            <div>Time: {new Date(finalReport.resolvedAt).toLocaleTimeString()}</div>
+            <div>Session: #{(finalReport.sessionId || 'session-live').slice(0, 16)}</div>
+          </div>
+        </div>
+      </div>
+
       {/* Final Summary Card Header */}
       <div
         className="card"
@@ -215,15 +231,28 @@ export const ResolutionView: React.FC<ResolutionViewProps> = ({
             </p>
           </div>
 
-          <button
-            type="button"
-            className="btn btn-outline btn-sm"
-            onClick={onStartNewDiagnosis}
-            title="Start a fresh troubleshooting session"
-          >
-            <RotateCcwIcon size={14} />
-            <span>Start New Diagnosis</span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm print-hide"
+              onClick={() => window.print()}
+              title="Print formal diagnostic audit report or save as PDF"
+              style={{ color: 'var(--primary-blue)', borderColor: '#BFDBFE' }}
+            >
+              <PrinterIcon size={14} />
+              <span>Print / Export PDF</span>
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-outline btn-sm print-hide"
+              onClick={onStartNewDiagnosis}
+              title="Start a fresh troubleshooting session"
+            >
+              <RotateCcwIcon size={14} />
+              <span>Start New Diagnosis</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -391,8 +420,68 @@ export const ResolutionView: React.FC<ResolutionViewProps> = ({
         </div>
       )}
 
+      {/* Technical Diagnostic Audit Ledger & Incident Evidence Trace */}
+      <div className="card audit-ledger-card" style={{ padding: '20px', marginBottom: '24px', backgroundColor: '#F8FAFC' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ServerIcon size={18} color="var(--primary-blue)" />
+            <h3 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+              Session Technical Audit Ledger & Decision Trace
+            </h3>
+          </div>
+          <span className="badge badge-blue" style={{ fontSize: '11px', fontFamily: 'monospace' }}>
+            Session #{(finalReport.sessionId || 'session-live').slice(0, 16)}
+          </span>
+        </div>
+
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
+            <thead>
+              <tr style={{ borderBottom: '1.5px solid #CBD5E1', textAlign: 'left', color: 'var(--text-secondary)' }}>
+                <th style={{ padding: '8px 10px', width: '25%' }}>Audit Checkpoint</th>
+                <th style={{ padding: '8px 10px', width: '50%' }}>Verified Evidence Record</th>
+                <th style={{ padding: '8px 10px', width: '25%' }}>Decision Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {finalReport.evidenceSummary.map((ev, idx) => (
+                <tr key={idx} style={{ borderBottom: '1px solid #E2E8F0', backgroundColor: idx % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }}>
+                  <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'monospace', fontSize: '12px' }}>
+                    CHECKPOINT_{idx + 1}
+                  </td>
+                  <td style={{ padding: '8px 10px', color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                    {ev}
+                  </td>
+                  <td style={{ padding: '8px 10px' }}>
+                    <span className="badge badge-teal" style={{ fontSize: '10px' }}>RULE_VERIFIED</span>
+                  </td>
+                </tr>
+              ))}
+              <tr style={{ borderBottom: '1px solid #E2E8F0', backgroundColor: '#F0FDFA' }}>
+                <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0F766E', fontFamily: 'monospace', fontSize: '12px' }}>
+                  ROOT_CAUSE_MATCH
+                </td>
+                <td style={{ padding: '8px 10px', color: '#0F766E', fontWeight: 500 }}>
+                  {finalReport.rootCause}
+                </td>
+                <td style={{ padding: '8px 10px' }}>
+                  <span className="badge" style={{ backgroundColor: '#CCFBF1', color: '#0F766E', border: '1px solid #99F6E4', fontSize: '10px' }}>
+                    FINAL_CONCLUSION
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', fontSize: '11.5px', color: 'var(--text-secondary)', flexWrap: 'wrap', gap: '8px' }}>
+          <span>Deterministic Inference Engine: Rule Graph Active</span>
+          <span>Verified: {new Date(finalReport.resolvedAt).toLocaleString()}</span>
+        </div>
+      </div>
+
       {/* Bottom Actions */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+      <div className="print-hide" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <button
           type="button"
           className="btn btn-outline"
@@ -408,7 +497,6 @@ export const ResolutionView: React.FC<ResolutionViewProps> = ({
           style={{ padding: '10px 24px' }}
         >
           <RotateCcwIcon size={15} />
-
           <span>Start New Diagnosis</span>
         </button>
       </div>
