@@ -17,7 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="site-header" role="banner">
-      <div className="header-inner">
+      <div className={`header-inner ${currentView === 'HOME' ? 'header-inner-home' : ''}`}>
         <div className="brand-group" onClick={onBrandClick} title="NetDoctor Home">
           <div className="brand-icon-wrapper" aria-hidden="true">
             <NetworkIcon size={22} color="#FFFFFF" />

@@ -44,8 +44,8 @@
   --brand-gradient: linear-gradient(135deg, #2563EB 0%, #6366F1 50%, #0891B2 100%);
 
   /* === Semantic Feedback === */
-  --color-border: #E1E9F5;
-  --color-border-hover: #C7D7F0;
+  --color-border: #CBD5E1;
+  --color-border-hover: #94A3B8;
   --color-border-focus: #2563EB;
 
   --color-success: #059669;

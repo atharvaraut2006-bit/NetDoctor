@@ -34,7 +34,7 @@ export const StepViewer: React.FC<StepViewerProps> = ({
   onNextStep,
   lastInterpretation
 }) => {
-  const { discoveredConfig, updateDiscoveredConfig, submissions, roadmap } = useDiagnostic();
+  const { discoveredConfig, updateDiscoveredConfig, submissions, roadmap, verifyResolution } = useDiagnostic();
 
   const osKey = selectedOS === 'other' ? 'windows' : selectedOS;
   let rawInstructions = step.instructions[osKey] || step.instructions.windows;
@@ -205,6 +205,7 @@ export const StepViewer: React.FC<StepViewerProps> = ({
       {lastInterpretation && (() => {
         const currentRoadmapItem = roadmap.find((r) => r.id === step.id);
         const isFailed = currentRoadmapItem?.status === 'FAILED';
+        const isTerminalNotice = lastInterpretation.includes('All diagnostic steps in the procedure roadmap have been evaluated') || !canGoForward;
 
         return (
           <div
@@ -214,18 +215,47 @@ export const StepViewer: React.FC<StepViewerProps> = ({
               backgroundColor: isFailed ? '#FEF2F2' : '#F0FDFA'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-              <div style={{ color: isFailed ? 'var(--color-error)' : 'var(--secondary-teal)', marginTop: '2px' }}>
-                {isFailed ? <AlertTriangleIcon size={20} /> : <CheckIcon size={20} />}
-              </div>
-              <div>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: isFailed ? 'var(--color-error)' : 'var(--text-primary)' }}>
-                  {isFailed ? 'Diagnostic Finding • Issue Identified' : 'Result Interpretation & Diagnostic Findings'}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: '240px' }}>
+                <div style={{ color: isFailed ? 'var(--color-error)' : 'var(--secondary-teal)', marginTop: '2px' }}>
+                  {isFailed ? <AlertTriangleIcon size={20} /> : <CheckIcon size={20} />}
                 </div>
-                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                  {lastInterpretation}
-                </p>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: isFailed ? 'var(--color-error)' : 'var(--text-primary)' }}>
+                    {isFailed ? 'Diagnostic Finding • Issue Identified' : 'Result Interpretation & Diagnostic Findings'}
+                  </div>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                    {lastInterpretation}
+                  </p>
+                </div>
               </div>
+
+              {isTerminalNotice && (
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  onClick={() => verifyResolution(true)}
+                  style={{
+                    backgroundColor: 'var(--color-success)',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: 'var(--radius-sm)',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                  title="Conclude diagnosis and view final report"
+                >
+                  <CheckIcon size={14} />
+                  <span>Problem Solved • View Report</span>
+                </button>
+              )}
             </div>
           </div>
         );
@@ -253,24 +283,47 @@ export const StepViewer: React.FC<StepViewerProps> = ({
         </button>
 
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            type="button"
-            className="btn btn-ghost"
-            onClick={onSkipStep}
-            title="Skip this step if already verified"
-          >
-            <span>Skip Step</span>
-          </button>
+          {canGoForward && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={onSkipStep}
+              title="Skip this step if already verified"
+            >
+              <span>Skip Step</span>
+            </button>
+          )}
 
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={onNextStep}
-            disabled={!canGoForward}
-          >
-            <span>Next Step</span>
-            <ChevronRightIcon size={16} />
-          </button>
+          {canGoForward ? (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={onNextStep}
+            >
+              <span>Next Step</span>
+              <ChevronRightIcon size={16} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => verifyResolution(true)}
+              style={{
+                backgroundColor: 'var(--color-success)',
+                borderColor: 'var(--color-success)',
+                color: '#FFFFFF',
+                boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontWeight: 600
+              }}
+              title="Conclude diagnosis and verify resolution"
+            >
+              <CheckIcon size={16} />
+              <span>Problem Solved / Finish</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
