@@ -91,16 +91,19 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
     detailedWhy: 'The Default Gateway is your device entry point to the rest of the network and the global internet. If pinging your router IP fails (e.g. 192.168.1.1 timed out or unreachable), the issue is located entirely inside your local network (cable, Wi-Fi radio, router crash) and not with your external Internet Service Provider.',
     instructions: {
       windows: [
+        'If you do not know your router IP, run "ipconfig | findstr /i Gateway" in Command Prompt (or use the Gateway Finder above).',
         'In Command Prompt, run the ping command targeting your default gateway (typically 192.168.1.1 or 192.168.0.1).',
         'Wait approximately 4 seconds for the 4 reply packets to finish.',
         'Copy the ping output including the statistics summary and paste it below.'
       ],
       macos: [
+        'If you do not know your router IP, run "route -n get default | grep gateway" in Terminal (or use the Gateway Finder above).',
         'In Terminal, run the ping command with 4 count packets as shown below.',
         'Wait for the summary statistics indicating 0% packet loss.',
         'Copy and paste the terminal output into the submission box.'
       ],
       linux: [
+        'If you do not know your router IP, run "ip route show default" in Terminal (or use the Gateway Finder above).',
         'In Terminal, enter the ping command below and press Enter.',
         'Wait for all 4 ICMP echo replies to return.',
         'Copy the output statistics and paste them below.'

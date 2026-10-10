@@ -2,6 +2,7 @@ import React from 'react';
 import type { DiagnosticStep, OperatingSystem, QuickResultOption } from '../../types/diagnostic';
 import { CommandBox } from './CommandBox';
 import { ResultSubmission } from './ResultSubmission';
+import { GatewayHelper } from './GatewayHelper';
 import { HelpCircleIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon, CheckIcon, ServerIcon, AlertTriangleIcon } from '../common/Icons';
 import { useDiagnostic } from '../../context/DiagnosticContext';
 
@@ -134,51 +135,13 @@ export const StepViewer: React.FC<StepViewerProps> = ({
           </ol>
         </div>
 
-        {/* Dynamic Gateway IP Input Option (Requirement 2) */}
-        {step.id === 'step_gateway_ping' && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '10px 14px',
-            backgroundColor: '#F8FAFC',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-            marginBottom: '12px',
-            flexWrap: 'wrap',
-            gap: '8px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label htmlFor="gateway-ip-input" style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                Target Gateway IP:
-              </label>
-              <input
-                id="gateway-ip-input"
-                type="text"
-                value={discoveredConfig.defaultGateway || ''}
-                onChange={(e) => updateDiscoveredConfig({ defaultGateway: e.target.value.trim() })}
-                placeholder="192.168.1.1 (or enter your router IP)"
-                style={{
-                  padding: '5px 10px',
-                  fontSize: '13px',
-                  fontFamily: 'monospace',
-                  borderRadius: '6px',
-                  border: '1px solid #CBD5E1',
-                  width: '180px',
-                  backgroundColor: '#FFFFFF'
-                }}
-              />
-            </div>
-            {discoveredConfig.defaultGateway ? (
-              <span className="badge badge-teal" style={{ fontSize: '11px' }}>
-                Auto-Detected & Remembered
-              </span>
-            ) : (
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                (Defaults to 192.168.1.1 or enter your router's IP)
-              </span>
-            )}
-          </div>
+        {/* Default Gateway IP Identification & Helper */}
+        {(step.id === 'step_gateway_ping' || step.title.toLowerCase().includes('default gateway')) && (
+          <GatewayHelper
+            selectedOS={selectedOS}
+            activeGateway={discoveredConfig.defaultGateway || ''}
+            onUpdateGateway={(gw) => updateDiscoveredConfig({ defaultGateway: gw })}
+          />
         )}
 
         {/* Command Box with Dynamic Command String */}

@@ -134,9 +134,9 @@ export function parseIpConfigOutput(raw: string): ParsedIpConfig {
 
     let defaultGateway: string | undefined;
     const gwMatch =
-      text.match(/Default\s+Gateway[.\s:]+(\d{1,3}\.\d{1,3}\.\d{1,3})/i) ||
-      text.match(/default\s+via\s+(\d{1,3}\.\d{1,3}\.\d{1,3})/i) ||
-      text.match(/gateway\s+(\d{1,3}\.\d{1,3}\.\d{1,3})/i);
+      text.match(/Default\s+Gateway[.\s:]+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i) ||
+      text.match(/default\s+via\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i) ||
+      text.match(/gateway\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i);
     if (gwMatch && gwMatch[1]) {
       defaultGateway = gwMatch[1].trim();
     }
