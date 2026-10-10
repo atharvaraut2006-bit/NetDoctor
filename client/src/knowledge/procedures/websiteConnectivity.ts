@@ -14,8 +14,9 @@ export const websiteConnectivityProcedure: DiagnosticProcedure = {
   stepIds: [
     'step_network_adapter',
     'step_ip_dhcp',
-    'step_http_reachability',
     'step_dns_lookup',
+    'step_http_reachability',
+    'step_dns_flush',
     'step_internet_ping'
   ],
   expectedEvidenceKeys: [

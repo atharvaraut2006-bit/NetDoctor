@@ -180,6 +180,17 @@ describe('Phase 3 — Knowledge Base Integrity & Schema Validation', () => {
       expect(CATEGORY_ROADMAPS.website_connectivity.stepIds).toContain('step_http_reachability');
       expect(CATEGORY_ROADMAPS.lan_connectivity.stepIds).toContain('step_lan_peer_ping');
     });
+
+    it('defines varied, problem-tailored step counts ranging from 3 to 6 steps', () => {
+      expect(CATEGORY_ROADMAPS.router_connectivity.stepIds.length).toBe(3);
+      expect(CATEGORY_ROADMAPS.network_adapter.stepIds.length).toBe(3);
+      expect(CATEGORY_ROADMAPS.ip_dhcp_problem.stepIds.length).toBe(4);
+      expect(CATEGORY_ROADMAPS.lan_connectivity.stepIds.length).toBe(4);
+      expect(CATEGORY_ROADMAPS.internet_not_working.stepIds.length).toBe(5);
+      expect(CATEGORY_ROADMAPS.wifi_connection.stepIds.length).toBe(6);
+      expect(CATEGORY_ROADMAPS.slow_internet.stepIds.length).toBe(6);
+      expect(CATEGORY_ROADMAPS.dns_problem.stepIds.length).toBe(6);
+    });
   });
 
   describe('Root Causes & Solutions Library (12 Root Causes)', () => {

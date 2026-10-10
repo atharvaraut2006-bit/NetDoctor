@@ -168,24 +168,39 @@ export const StepViewer: React.FC<StepViewerProps> = ({
       {lastInterpretation && (() => {
         const currentRoadmapItem = roadmap.find((r) => r.id === step.id);
         const isFailed = currentRoadmapItem?.status === 'FAILED';
-        const isTerminalNotice = lastInterpretation.includes('All diagnostic steps in the procedure roadmap have been evaluated') || !canGoForward;
+        const isUnrecognized = lastInterpretation.toLowerCase().includes('unrecognized');
+        const isTerminalNotice = !isUnrecognized && (lastInterpretation.includes('All diagnostic steps in the procedure roadmap have been evaluated') || !canGoForward);
+
+        const borderCol = isUnrecognized
+          ? 'var(--color-warning)'
+          : isFailed
+          ? 'var(--color-error)'
+          : 'var(--secondary-teal)';
+
+        const bgCol = isUnrecognized ? '#FFFBEB' : isFailed ? '#FEF2F2' : '#F0FDFA';
+        const iconCol = isUnrecognized ? 'var(--color-warning)' : isFailed ? 'var(--color-error)' : 'var(--secondary-teal)';
+        const headerTitle = isUnrecognized
+          ? 'Input Validation • Unrecognized Command Output'
+          : isFailed
+          ? 'Diagnostic Finding • Issue Identified'
+          : 'Result Interpretation & Diagnostic Findings';
 
         return (
           <div
             className="card"
             style={{
-              borderLeft: `4px solid ${isFailed ? 'var(--color-error)' : 'var(--secondary-teal)'}`,
-              backgroundColor: isFailed ? '#FEF2F2' : '#F0FDFA'
+              borderLeft: `4px solid ${borderCol}`,
+              backgroundColor: bgCol
             }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: '240px' }}>
-                <div style={{ color: isFailed ? 'var(--color-error)' : 'var(--secondary-teal)', marginTop: '2px' }}>
-                  {isFailed ? <AlertTriangleIcon size={20} /> : <CheckIcon size={20} />}
+                <div style={{ color: iconCol, marginTop: '2px' }}>
+                  {isFailed || isUnrecognized ? <AlertTriangleIcon size={20} /> : <CheckIcon size={20} />}
                 </div>
                 <div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: isFailed ? 'var(--color-error)' : 'var(--text-primary)' }}>
-                    {isFailed ? 'Diagnostic Finding • Issue Identified' : 'Result Interpretation & Diagnostic Findings'}
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: isUnrecognized ? 'var(--color-warning)' : isFailed ? 'var(--color-error)' : 'var(--text-primary)' }}>
+                    {headerTitle}
                   </div>
                   <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                     {lastInterpretation}

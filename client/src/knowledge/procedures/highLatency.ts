@@ -13,10 +13,11 @@ export const highLatencyProcedure: DiagnosticProcedure = {
   initialStepId: 'step_network_adapter',
   stepIds: [
     'step_network_adapter',
-    'step_ping_latency_jitter',
+    'step_wifi_signal',
     'step_gateway_ping',
+    'step_ping_latency_jitter',
     'step_trace_route',
-    'step_wifi_signal'
+    'step_internet_ping'
   ],
   expectedEvidenceKeys: [
     'adapter_state',

@@ -13,7 +13,6 @@ export const networkAdapterProcedure: DiagnosticProcedure = {
   initialStepId: 'step_network_adapter',
   stepIds: [
     'step_network_adapter',
-    'step_ip_dhcp',
     'step_adapter_restart',
     'step_gateway_ping'
   ],

@@ -47,7 +47,7 @@ export interface FinalDiagnosticReport {
 }
 
 export interface DiagnosticDecision {
-  type: 'NEXT_STEP' | 'ROOT_CAUSE_FOUND' | 'REASSESS_PATH' | 'NEED_CLARIFICATION' | 'VERIFY_RESOLUTION';
+  type: 'NEXT_STEP' | 'ROOT_CAUSE_FOUND' | 'REASSESS_PATH' | 'NEED_CLARIFICATION' | 'VERIFY_RESOLUTION' | 'UNRECOGNIZED_OUTPUT';
   nextStepId?: string;
   nextStepIndex?: number;
   plainReason: string;

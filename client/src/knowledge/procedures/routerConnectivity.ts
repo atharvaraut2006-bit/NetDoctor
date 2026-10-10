@@ -14,8 +14,7 @@ export const routerConnectivityProcedure: DiagnosticProcedure = {
   stepIds: [
     'step_network_adapter',
     'step_ip_dhcp',
-    'step_gateway_ping',
-    'step_trace_route'
+    'step_gateway_ping'
   ],
   expectedEvidenceKeys: [
     'adapter_state',

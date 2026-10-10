@@ -16,6 +16,7 @@ export const slowInternetProcedure: DiagnosticProcedure = {
     'step_ping_latency_jitter',
     'step_gateway_ping',
     'step_trace_route',
+    'step_wifi_signal',
     'step_internet_ping'
   ],
   expectedEvidenceKeys: [

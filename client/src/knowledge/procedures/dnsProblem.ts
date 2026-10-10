@@ -14,9 +14,10 @@ export const dnsProblemProcedure: DiagnosticProcedure = {
   stepIds: [
     'step_network_adapter',
     'step_ip_dhcp',
+    'step_gateway_ping',
     'step_dns_lookup',
-    'step_internet_ping',
-    'step_dns_flush'
+    'step_dns_flush',
+    'step_internet_ping'
   ],
   expectedEvidenceKeys: [
     'adapter_state',

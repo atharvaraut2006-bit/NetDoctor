@@ -407,5 +407,33 @@ describe('Phase 4 — Interactive Diagnostic Engine', () => {
       expect(verifResult.updatedSession.status).toBe('IN_PROGRESS');
       expect(verifResult.finalReport).toBeNull();
     });
+
+    it('safely handles unrecognized non-command output without falsely declaring a root cause or redirecting', () => {
+      const engine = new DiagnosticEngine();
+      const classification = classifyProblem('Internet not working');
+      const context = createValidatedProblemContext({
+        rawInput: 'Internet not working',
+        classification,
+        selectedOS: 'windows'
+      });
+
+      let session = engine.startSession(context, 'windows', 'internet_not_working');
+
+      // User types arbitrary non-command text "hello world"
+      const result = engine.processSubmission(session, 'step_network_adapter', 'OUTPUT', {
+        output: 'hello world'
+      });
+
+      // Must NOT declare root cause or transition to AWAITING_VERIFICATION / RESOLVED
+      expect(result.decision.type).toBe('UNRECOGNIZED_OUTPUT');
+      expect(result.decision.plainReason).toContain('Unrecognized terminal output');
+      expect(result.decision.plainReason).toContain('netsh interface show interface');
+      expect(result.decision.rootCause).toBeUndefined();
+      expect(result.updatedSession.status).toBe('IN_PROGRESS');
+
+      // The step must remain CURRENT in the roadmap (not marked FAILED or COMPLETED)
+      const currentStep = result.updatedSession.roadmap.find((r) => r.id === 'step_network_adapter');
+      expect(currentStep?.status).toBe('CURRENT');
+    });
   });
 });

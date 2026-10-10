@@ -16,6 +16,7 @@ export const wifiConnectionProcedure: DiagnosticProcedure = {
     'step_wifi_signal',
     'step_ip_dhcp',
     'step_gateway_ping',
+    'step_ping_latency_jitter',
     'step_internet_ping'
   ],
   expectedEvidenceKeys: [

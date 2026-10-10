@@ -110,6 +110,30 @@ export class DiagnosticEngine {
       interpretationSummary = interp.plainLanguageExplanation;
       isPassed = interp.isPassed;
       extractedMetrics = interp.extractedMetrics;
+
+      // Handle Unrecognized Output: if output is non-network gibberish or does not contain command signatures
+      if (interp.outcomeType === 'UNRECOGNIZED_OUTPUT' || extractedMetrics?.isValidOutput === false) {
+        const stepDef = DIAGNOSTIC_STEPS_LIBRARY[stepId];
+        const osKey = session.selectedOS === 'other' ? 'windows' : session.selectedOS;
+        const expectedCmd = stepDef ? (stepDef.command[osKey] || stepDef.command.windows) : 'the command';
+
+        const warningReason = `Unrecognized terminal output: The text you submitted does not contain valid output for "${expectedCmd}". Please run the command in your Command Prompt/Terminal, copy the actual output, and paste it here.`;
+
+        const decision: DiagnosticDecision = {
+          type: 'UNRECOGNIZED_OUTPUT',
+          plainReason: warningReason,
+          evidenceAdded: [],
+          contradictionDetected: false,
+          updatedRoadmap: session.roadmap
+        };
+
+        const updatedSession: DiagnosticSessionState = {
+          ...session,
+          lastDecision: decision
+        };
+
+        return { updatedSession, decision };
+      }
     } else if (submissionType === 'SCREENSHOT') {
       interpretationSummary = `Screenshot "${data.fileName || 'terminal_capture.png'}" recorded. (Phase 5 will perform OCR extraction).`;
       isPassed = true;
