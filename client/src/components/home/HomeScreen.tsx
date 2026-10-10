@@ -5,7 +5,7 @@ import { OSSelector } from './OSSelector';
 import { CommonProblemsGrid } from './CommonProblemsGrid';
 import { ValidationFeedback } from './ValidationFeedback';
 import { FollowUpQuestionCard } from './FollowUpQuestionCard';
-import { NetworkVisual } from '../common/NetworkVisual';
+import { AboutSection } from './AboutSection';
 import { NetworkIcon, ArrowRightIcon } from '../common/Icons';
 
 interface HomeScreenProps {
@@ -28,6 +28,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [problemText, setProblemText] = useState('');
   const [selectedOS, setSelectedOS] = useState<OperatingSystem>('windows');
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  const QUICK_SYMPTOMS = [
+    { label: 'Connected, no web access', text: 'My Wi-Fi shows connected with full signal but web pages will not load' },
+    { label: 'Websites not loading (DNS)', text: 'Websites fail to open with DNS probe finished or server not found error' },
+    { label: 'High ping in online games', text: 'My latency and ping are spiking over 200ms with jitter during online gaming' },
+    { label: 'Intermittent packet drops', text: 'Frequent connection drops and packet loss during calls or streaming' }
+  ];
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,28 +59,38 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     onStartDiagnosis(text, selectedOS);
   };
 
+  const handleQuickSymptomClick = (text: string) => {
+    setProblemText(text);
+    setValidationError(null);
+    if (rejectionReason) onClearRejection();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      if (problemText.trim()) {
+        handleFormSubmit(e);
+      }
+    }
+  };
+
   return (
     <div className="home-container">
       {/* Hero Section */}
       <section className="home-hero">
         <div className="home-badge">
-          <NetworkIcon size={15} />
+          <NetworkIcon size={14} />
           <span>Structured Diagnostic System</span>
         </div>
         <h1 className="home-title">What's wrong with your network?</h1>
         <p className="home-description">
-          Describe the problem in your own words. NetDoctor understands your description and validates the network scope.
+          Describe the problem in your own words. NetDoctor understands your description and validates the network scope to guide you through systematic, safe troubleshooting.
         </p>
-      </section>
-
-      {/* Subtle Network Pipeline Visual */}
-      <section className="home-visual-section" aria-label="Network Diagnostic Visual">
-        <NetworkVisual activeStage="ALL" />
       </section>
 
       {/* Non-Networking Validation Rejection Alert */}
       {rejectionReason && (
-        <section style={{ width: '100%' }}>
+        <section style={{ width: '100%', marginBottom: '24px' }}>
           <ValidationFeedback
             rejectionReason={rejectionReason}
             onSelectSuggestion={handleSuggestionSelect}
@@ -93,28 +110,53 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           />
         </section>
       ) : (
-        /* Main Natural Language Input Card */
+        /* Main Diagnostic Command Center Card (Placed Directly Below Hero) */
         <section className="home-input-card">
-          <div className="card">
+          <div className="card home-command-card">
             <form onSubmit={handleFormSubmit} className="problem-input-container">
-              <label htmlFor="network-problem-input" style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>
-                Describe your network issue:
-              </label>
-              <textarea
-                id="network-problem-input"
-                className="problem-textarea"
-                placeholder="E.g., My Wi-Fi is connected with full signal but web pages won't open, or my ping in online games is suddenly very high..."
-                value={problemText}
-                onChange={(e) => {
-                  setProblemText(e.target.value);
-                  if (validationError) setValidationError(null);
-                  if (rejectionReason) onClearRejection();
-                }}
-                rows={4}
-              />
+              <div className="input-header-row">
+                <label htmlFor="network-problem-input" className="input-label-primary">
+                  Describe your network issue:
+                </label>
+                <span className="input-hint-badge">Plain Language Network Input</span>
+              </div>
+
+              {/* Quick Symptom Chips */}
+              <div className="quick-symptoms-bar" aria-label="Common Symptom Examples">
+                <span className="quick-symptoms-label">Quick examples:</span>
+                <div className="quick-chips-list">
+                  {QUICK_SYMPTOMS.map((chip, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      className="quick-chip-btn"
+                      onClick={() => handleQuickSymptomClick(chip.text)}
+                      title={`Use example: "${chip.text}"`}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="textarea-wrapper">
+                <textarea
+                  id="network-problem-input"
+                  className="problem-textarea"
+                  placeholder="E.g., My Wi-Fi is connected with full signal but web pages won't open, or my ping in online games is suddenly very high..."
+                  value={problemText}
+                  onChange={(e) => {
+                    setProblemText(e.target.value);
+                    if (validationError) setValidationError(null);
+                    if (rejectionReason) onClearRejection();
+                  }}
+                  onKeyDown={handleKeyDown}
+                  rows={4}
+                />
+              </div>
 
               {validationError && (
-                <div style={{ color: 'var(--color-error)', fontSize: '13px', fontWeight: 500 }}>
+                <div className="input-error-msg" role="alert">
                   {validationError}
                 </div>
               )}
@@ -122,14 +164,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <div className="input-footer">
                 <OSSelector selectedOS={selectedOS} onSelectOS={setSelectedOS} />
 
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-lg"
-                  disabled={!problemText.trim()}
-                >
-                  <span>Start Diagnosis</span>
-                  <ArrowRightIcon size={18} />
-                </button>
+                <div className="input-actions-right">
+                  <span className="input-shortcut-hint">Ctrl + Enter to run</span>
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-lg start-diagnosis-btn"
+                    disabled={!problemText.trim()}
+                  >
+                    <span>Start Diagnosis</span>
+                    <ArrowRightIcon size={18} />
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -140,6 +185,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <section className="home-common-problems">
         <CommonProblemsGrid onSelectProblem={handleCommonProblemSelect} />
       </section>
+
+      {/* About NetDoctor Section */}
+      <AboutSection />
     </div>
   );
 };

@@ -9,7 +9,7 @@ interface OSSelectorProps {
 export const OSSelector: React.FC<OSSelectorProps> = ({ selectedOS, onSelectOS }) => {
   return (
     <div className="os-selector-group">
-      <span className="os-label">Select OS:</span>
+      <span className="os-label">Target OS:</span>
       <div className="os-pills" role="radiogroup" aria-label="Operating System Selection">
         <button
           type="button"
@@ -18,6 +18,7 @@ export const OSSelector: React.FC<OSSelectorProps> = ({ selectedOS, onSelectOS }
           className={`os-pill-btn ${selectedOS === 'windows' ? 'active' : ''}`}
           onClick={() => onSelectOS('windows')}
         >
+          <span className="os-dot" aria-hidden="true" />
           Windows
         </button>
         <button
@@ -27,6 +28,7 @@ export const OSSelector: React.FC<OSSelectorProps> = ({ selectedOS, onSelectOS }
           className={`os-pill-btn ${selectedOS === 'macos' ? 'active' : ''}`}
           onClick={() => onSelectOS('macos')}
         >
+          <span className="os-dot" aria-hidden="true" />
           macOS
         </button>
         <button
@@ -36,6 +38,7 @@ export const OSSelector: React.FC<OSSelectorProps> = ({ selectedOS, onSelectOS }
           className={`os-pill-btn ${selectedOS === 'linux' ? 'active' : ''}`}
           onClick={() => onSelectOS('linux')}
         >
+          <span className="os-dot" aria-hidden="true" />
           Linux
         </button>
       </div>

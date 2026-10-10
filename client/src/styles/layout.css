@@ -140,7 +140,7 @@
   width: 100%;
   max-width: var(--max-width-home);
   margin: 0 auto;
-  padding: 56px 24px 72px 24px;
+  padding: 48px 24px 80px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -149,23 +149,24 @@
 
 .home-hero {
   text-align: center;
-  margin-bottom: 40px;
-  max-width: 720px;
+  margin-bottom: 32px;
+  max-width: 760px;
 }
 
 .home-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
+  gap: 7px;
+  padding: 6px 16px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--primary-blue-subtle), var(--accent-indigo-subtle));
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  color: var(--accent-indigo);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(99, 102, 241, 0.12));
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  color: var(--primary-blue);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   margin-bottom: 20px;
   letter-spacing: 0.01em;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.06);
 }
 
 .home-title {
@@ -184,20 +185,18 @@
   font-size: 16.5px;
   color: var(--text-secondary);
   line-height: 1.7;
-}
-
-.home-visual-section {
-  width: 100%;
-  margin-bottom: 36px;
+  max-width: 680px;
+  margin: 0 auto;
 }
 
 .home-input-card {
   width: 100%;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
 }
 
 .home-common-problems {
   width: 100%;
+  margin-bottom: 40px;
 }
 
 /* ============================================
