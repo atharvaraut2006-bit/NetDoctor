@@ -46,10 +46,6 @@ export const DiagnosticWorkspace: React.FC<DiagnosticWorkspaceProps> = ({
     onSubmitResult(currentStep.id, 'OUTPUT', { output });
   };
 
-  const handleScreenshot = (file: File) => {
-    onSubmitResult(currentStep.id, 'SCREENSHOT', { fileName: file.name });
-  };
-
   return (
     <div className="workspace-container">
       {/* Left Sidebar: Diagnostic Roadmap */}
@@ -71,7 +67,6 @@ export const DiagnosticWorkspace: React.FC<DiagnosticWorkspaceProps> = ({
         onOpenWhy={() => setIsWhyOpen(true)}
         onSubmitQuickResult={handleQuickResult}
         onSubmitPastedOutput={handlePastedOutput}
-        onSubmitScreenshot={handleScreenshot}
         onPreviousStep={onPreviousStep}
         onSkipStep={onSkipStep}
         canGoBack={currentStepIndex > 0}

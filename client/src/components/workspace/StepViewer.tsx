@@ -12,7 +12,6 @@ interface StepViewerProps {
   onOpenWhy: () => void;
   onSubmitQuickResult: (option: QuickResultOption) => void;
   onSubmitPastedOutput: (output: string) => void;
-  onSubmitScreenshot: (file: File) => void;
   onPreviousStep: () => void;
   onSkipStep: () => void;
   canGoBack: boolean;
@@ -28,7 +27,6 @@ export const StepViewer: React.FC<StepViewerProps> = ({
   onOpenWhy,
   onSubmitQuickResult,
   onSubmitPastedOutput,
-  onSubmitScreenshot,
   onPreviousStep,
   onSkipStep,
   canGoBack,
@@ -240,7 +238,6 @@ export const StepViewer: React.FC<StepViewerProps> = ({
         initialOutput={existingSubmission}
         onSubmitQuickResult={onSubmitQuickResult}
         onSubmitPastedOutput={onSubmitPastedOutput}
-        onSubmitScreenshot={onSubmitScreenshot}
       />
 
       {/* Navigation Controls */}
