@@ -51,10 +51,12 @@ export interface ParsedIpConfig {
 }
 
 export interface ParsedPingStats {
+  destination?: string;
   packetsSent: number;
   packetsReceived: number;
   packetsLost: number;
   lossPercentage: number;
+  packetLossPercent?: number;
   minRtt?: number;
   maxRtt?: number;
   avgRtt?: number;
@@ -63,6 +65,7 @@ export interface ParsedPingStats {
   isTimeout: boolean;
   isUnreachable: boolean;
   isGeneralFailure: boolean;
+  isIntermittentLoss?: boolean;
   isValidOutput: boolean;
 }
 

@@ -217,7 +217,9 @@ export const DiagnosticProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       command: def.command,
       expectedResult: def.expectedResult,
       defaultStatus: (idx === 0 ? 'CURRENT' : 'PENDING') as StepStatus,
-      isDisruptive: def.isDisruptive
+      isDisruptive: def.isDisruptive,
+      safety: def.safety,
+      visualGuidance: def.visualGuidance
     }));
 
     setProblemContext(context);
@@ -257,7 +259,9 @@ export const DiagnosticProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       command: def.command,
       expectedResult: def.expectedResult,
       defaultStatus: (idx === 0 ? 'CURRENT' : 'PENDING') as StepStatus,
-      isDisruptive: def.isDisruptive
+      isDisruptive: def.isDisruptive,
+      safety: def.safety,
+      visualGuidance: def.visualGuidance
     }));
 
     setProblemContext(context);
@@ -382,6 +386,23 @@ export const DiagnosticProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setSuggestedSolution(decision.rootCause);
       setResolutionStatus('AWAITING_VERIFICATION');
       setView('RESOLUTION');
+    } else if (decision.type === 'UNSUPPORTED_OR_ESCALATE' && decision.escalationData) {
+      const finalReport: FinalDiagnosticReport = {
+        problemIdentified: session.initialProblemText || session.categoryDisplayName,
+        categoryKey: session.categoryKey,
+        rootCause: decision.escalationData.title,
+        technicalExplanation: decision.escalationData.reason,
+        evidenceSummary: decision.escalationData.evidenceSummary,
+        solutionSteps: decision.escalationData.technicalHandoffNotes,
+        whatHappened: decision.plainReason,
+        stepsThatFixedIt: [],
+        preventionRecommendations: decision.escalationData.recommendedQuestions,
+        resolvedAt: new Date(),
+        escalation: decision.escalationData
+      };
+      setFinalReport(finalReport);
+      setResolutionStatus('RESOLVED');
+      setView('RESOLUTION');
     }
   };
 
@@ -409,7 +430,7 @@ export const DiagnosticProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     setSession(updatedSession);
 
-    if (isFixed && report) {
+    if (report) {
       setFinalReport(report);
       setResolutionStatus('RESOLVED');
       setView('RESOLUTION');

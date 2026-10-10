@@ -86,10 +86,10 @@ export function translateOutcomeToPlainLanguage(ctx: TranslationContext): {
     case 'step_gateway_ping': {
       if (outcomeType === 'TIMEOUT' || outcomeType === 'FAILURE' || metrics.lossPercentage === 100) {
         return {
-          summary: 'Local router / gateway is not responding',
+          summary: 'Local router / gateway is not responding to ping',
           plainLanguageExplanation:
-            'Your device sent test signals to your local router, but none returned. The problem is inside your local network or router, not with the external Internet provider.',
-          technicalDetails: `Ping to Gateway: 100% packet loss (${metrics.packetsSent || 4} sent, 0 received). Request timed out.`
+            'Your device sent test packets to your local router gateway, but received no replies. This indicates a local network link failure, router crash, or router firewall policy dropping ICMP requests.',
+          technicalDetails: `Ping to Gateway: 100% packet loss (${metrics.packetsSent || 4} sent, 0 received). Request timed out on local subnet.`
         };
       }
       if (outcomeType === 'UNREACHABLE') {
@@ -144,10 +144,10 @@ export function translateOutcomeToPlainLanguage(ctx: TranslationContext): {
     case 'step_internet_ping': {
       if (outcomeType === 'TIMEOUT' || metrics.lossPercentage === 100) {
         return {
-          summary: 'Internet WAN connection is down (8.8.8.8 unreachable)',
+          summary: 'No response received from external destination (8.8.8.8)',
           plainLanguageExplanation:
-            'Your device cannot reach public servers on the global Internet. Since your local router is functioning, this indicates an outage with your Internet Service Provider (ISP).',
-          technicalDetails: 'Ping 8.8.8.8: 100% packet loss. WAN routing down.'
+            'All test packets sent to 8.8.8.8 timed out. Note that a ping timeout means packets did not return, but does not definitively prove the remote host is offline (firewalls, routing filters, or ISP gateway drops can block ICMP echo replies). Since your local router is reachable, this points to an upstream ISP routing fault or WAN outage.',
+          technicalDetails: 'Ping 8.8.8.8: 100% packet loss. ICMP echo requests timed out without reply. Observed packet loss on WAN path.'
         };
       }
       if (metrics.lossPercentage > 0) {

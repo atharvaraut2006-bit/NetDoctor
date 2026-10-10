@@ -11,7 +11,8 @@ import type {
   DiagnosticDecision,
   FinalDiagnosticReport,
   EvidenceRecord,
-  StepSubmissionRecord
+  StepSubmissionRecord,
+  EscalationReportData
 } from './types';
 import { getProcedure } from '../../knowledge/procedures';
 import { DIAGNOSTIC_STEPS_LIBRARY } from '../../knowledge/steps';
@@ -92,7 +93,14 @@ export class DiagnosticEngine {
     session: DiagnosticSessionState,
     stepId: string,
     submissionType: SubmissionType,
-    data: { option?: QuickResultOption; output?: string; fileName?: string }
+    data: {
+      option?: QuickResultOption;
+      output?: string;
+      fileName?: string;
+      outcome?: string;
+      isPassed?: boolean;
+      userNotes?: string;
+    }
   ): { updatedSession: DiagnosticSessionState; decision: DiagnosticDecision } {
     let interpretationSummary = '';
     let isPassed = true;
@@ -135,11 +143,31 @@ export class DiagnosticEngine {
         return { updatedSession, decision };
       }
     } else if (submissionType === 'SCREENSHOT') {
-      interpretationSummary = `Screenshot "${data.fileName || 'terminal_capture.png'}" recorded. (Phase 5 will perform OCR extraction).`;
-      isPassed = true;
+      const option: QuickResultOption =
+        data.option ||
+        (data.outcome === 'FAILED' || data.isPassed === false || data.outcome === 'DIFFERENT'
+          ? 'FAILURE'
+          : 'SUCCESS');
+      const interp = interpretQuickOption(stepId, option);
+      interpretationSummary = `Screenshot "${data.fileName || 'capture.png'}" verified: ${interp.plainLanguageExplanation}`;
+      isPassed = interp.isPassed;
+      extractedMetrics = { fileName: data.fileName, userOption: option };
     }
 
-    // 2. Map interpretation to structured evidence records
+    // 2. Check Prerequisites: ensure lower layer requirements are satisfied
+    const prereq = this.stepSelector.checkPrerequisites(stepId, this.evidenceStore);
+    if (!prereq.satisfied) {
+      const decision: DiagnosticDecision = {
+        type: 'PREREQUISITE_FAILED',
+        plainReason: prereq.reason || 'Technical prerequisites for this step are not satisfied.',
+        evidenceAdded: [],
+        contradictionDetected: false,
+        updatedRoadmap: session.roadmap
+      };
+      return { updatedSession: session, decision };
+    }
+
+    // 3. Map interpretation to structured evidence records
     const newEvidenceList = this.mapStepResultToEvidence(stepId, isPassed, extractedMetrics);
     const contradictions: string[] = [];
 
@@ -150,7 +178,11 @@ export class DiagnosticEngine {
         ev.value,
         ev.layer,
         stepId,
-        ev.status
+        ev.status,
+        {
+          destination: ev.destination,
+          isIntermittent: ev.isIntermittent || ev.status === 'INTERMITTENT'
+        }
       );
       if (res.isContradiction && res.contradictionMessage) {
         contradictions.push(res.contradictionMessage);
@@ -248,6 +280,43 @@ export class DiagnosticEngine {
       if (foundIdx !== -1) {
         nextStepIndex = foundIdx;
       }
+    }
+
+    if (!nextSelection.nextStepId) {
+      const escalationData = this.generateEscalationReport({
+        ...session,
+        submissions: updatedSubmissions,
+        completedStepIds: updatedCompletedIds,
+        failedStepIds: updatedFailedIds
+      });
+
+      decision = {
+        type: 'UNSUPPORTED_OR_ESCALATE',
+        nextStepId: undefined,
+        nextStepIndex,
+        plainReason: `Diagnostic procedure finished. ${nextSelection.reason}`,
+        evidenceAdded: newEvidenceList,
+        contradictionDetected: contradictions.length > 0,
+        contradictionWarning: contradictions[0],
+        updatedRoadmap: nextSelection.updatedRoadmap,
+        escalationData
+      };
+
+      const updatedSession: DiagnosticSessionState = {
+        ...session,
+        activeStepId,
+        currentStepIndex: nextStepIndex,
+        submissions: updatedSubmissions,
+        completedStepIds: updatedCompletedIds,
+        failedStepIds: updatedFailedIds,
+        evidenceStore: this.evidenceStore.getAll(),
+        roadmap: nextSelection.updatedRoadmap,
+        contradictionsDetected: [...session.contradictionsDetected, ...contradictions],
+        lastDecision: decision,
+        escalationReport: escalationData
+      };
+
+      return { updatedSession, decision };
     }
 
     decision = {
@@ -410,7 +479,41 @@ export class DiagnosticEngine {
       return { updatedSession, finalReport };
     }
 
-    // If not fixed, revert to IN_PROGRESS to continue testing remaining steps
+    // If not fixed:
+    const remainingSteps = session.activeProcedure.stepIds.filter(
+      (id) => !session.completedStepIds.includes(id) && session.activeStepId !== id
+    );
+
+    if (remainingSteps.length === 0) {
+      const escalation = this.generateEscalationReport(session);
+      const finalReport: FinalDiagnosticReport = {
+        problemIdentified: session.initialProblemText || session.categoryDisplayName,
+        categoryKey: session.categoryKey,
+        rootCause: 'Unresolved Network Impairment (Escalation Required)',
+        technicalExplanation:
+          'Local client-side troubleshooting procedures were completed without restoring connectivity. Upstream ISP, network administrator, or hardware intervention is required.',
+        evidenceSummary: this.evidenceStore.generateSummaryList(),
+        solutionSteps: escalation.technicalHandoffNotes,
+        whatHappened:
+          'Standard automated and manual remedies did not restore end-to-end network connectivity.',
+        stepsThatFixedIt: [],
+        preventionRecommendations: escalation.recommendedQuestions,
+        resolvedAt: new Date(),
+        escalation
+      };
+
+      const updatedSession: DiagnosticSessionState = {
+        ...session,
+        status: 'RESOLVED',
+        isVerifiedFixed: false,
+        finalReport,
+        escalationReport: escalation
+      };
+
+      return { updatedSession, finalReport };
+    }
+
+    // If not fixed and steps remain, revert to IN_PROGRESS to continue testing remaining steps
     const updatedSession: DiagnosticSessionState = {
       ...session,
       status: 'IN_PROGRESS',
@@ -419,6 +522,68 @@ export class DiagnosticEngine {
     };
 
     return { updatedSession, finalReport: null };
+  }
+
+  /**
+   * Generates a structured Technical Escalation Report for ISP, Network Administrator, or Hardware Support
+   */
+  public generateEscalationReport(_session: DiagnosticSessionState): EscalationReportData {
+    const evidenceList = this.evidenceStore.generateSummaryList();
+    const gatewayEv = this.evidenceStore.get('gateway_reachability');
+    const adapterEv = this.evidenceStore.get('adapter_link');
+
+    let escalateTo: 'ISP' | 'NETWORK_ADMIN' | 'HARDWARE_SUPPORT' = 'ISP';
+    let title = 'Internet Service Provider (ISP) Support Escalation';
+    let reason =
+      'Local network and router communication are verified healthy, but upstream internet routing/transit is unresponsive.';
+    let technicalHandoffNotes = [
+      'Local network adapter is up and operational.',
+      'Default gateway responds to ICMP echo requests with normal latency.',
+      'Public internet destinations (ICMP 8.8.8.8 / 1.1.1.1) are unreachable or timing out.',
+      'Troubleshooting completed across local OSI physical, data link, and local network layers with no client-side faults.'
+    ];
+    let recommendedQuestions = [
+      'Are there any known fiber/broadband outages or degraded service alerts in my area?',
+      'Can you check the WAN status and optical signal levels (or DSL sync) on my line from your end?',
+      'Has there been a recent DHCP lease or gateway IP change on the ISP upstream subnet?'
+    ];
+
+    if (adapterEv && adapterEv.status === 'FAULT_DETECTED') {
+      escalateTo = 'HARDWARE_SUPPORT';
+      title = 'Network Adapter / Physical Interface Escalation';
+      reason = 'Local physical interface fails to detect link signal or network cable connection.';
+      technicalHandoffNotes = [
+        'Ethernet/Wi-Fi adapter state reports media disconnected or driver error.',
+        'Software adapter resets and re-enabling attempts failed to re-establish link.',
+        'Requires inspection of physical port, network patch cable, or adapter hardware.'
+      ];
+      recommendedQuestions = [
+        'Does the network adapter show error codes in Device Manager / system logs?',
+        'Can the network port or PCIe/USB interface be tested with a known working cable?'
+      ];
+    } else if (gatewayEv && gatewayEv.status === 'FAULT_DETECTED') {
+      escalateTo = 'NETWORK_ADMIN';
+      title = 'Local Router & Gateway Infrastructure Escalation';
+      reason = 'Device cannot establish communication with the local default gateway.';
+      technicalHandoffNotes = [
+        'Local adapter has an IP address assigned, but default gateway does not reply to ICMP ping.',
+        'Local ARP or router forwarding appears unresponsive or subnet configuration is mismatched.',
+        'Requires access to router management console or managed switch port configuration.'
+      ];
+      recommendedQuestions = [
+        'Is the gateway router operational and answering requests on its LAN subnet?',
+        'Is there MAC filtering or 802.1X port security blocking this client device?'
+      ];
+    }
+
+    return {
+      escalateTo,
+      title,
+      reason,
+      evidenceSummary: evidenceList.length > 0 ? evidenceList : ['Diagnostic procedure checks recorded.'],
+      technicalHandoffNotes,
+      recommendedQuestions
+    };
   }
 
   /**
@@ -505,7 +670,9 @@ export class DiagnosticEngine {
         });
         break;
 
-      case 'step_ping_latency_jitter':
+      case 'step_ping_latency_jitter': {
+        const isIntermittent = metrics?.isIntermittentLoss || (metrics?.lossPercentage > 0 && metrics?.lossPercentage < 100);
+        const jitterStatus = isIntermittent ? ('INTERMITTENT' as const) : status;
         records.push({
           key: 'ping_latency_jitter',
           label: 'Packet Loss & Latency Jitter Metrics',
@@ -513,9 +680,12 @@ export class DiagnosticEngine {
           layer: 'Transport / Latency',
           sourceStepId: stepId,
           observedAt: new Date(),
-          status
+          status: jitterStatus,
+          destination: metrics?.destination || '8.8.8.8',
+          isIntermittent: Boolean(isIntermittent)
         });
         break;
+      }
 
       case 'step_trace_route':
         records.push({

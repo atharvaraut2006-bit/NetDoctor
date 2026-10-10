@@ -3,6 +3,7 @@ import type { DiagnosticStep, OperatingSystem, QuickResultOption } from '../../t
 import { CommandBox } from './CommandBox';
 import { ResultSubmission } from './ResultSubmission';
 import { GatewayHelper } from './GatewayHelper';
+import { VisualGuidance } from './VisualGuidance';
 import { HelpCircleIcon, ChevronLeftIcon, ChevronRightIcon, InfoIcon, CheckIcon, ServerIcon, AlertTriangleIcon } from '../common/Icons';
 import { useDiagnostic } from '../../context/DiagnosticContext';
 
@@ -11,8 +12,9 @@ interface StepViewerProps {
   selectedOS: OperatingSystem;
   totalSteps: number;
   onOpenWhy: () => void;
-  onSubmitQuickResult: (option: QuickResultOption) => void;
+  onSubmitQuickResult: (option: QuickResultOption, clarification?: string) => void;
   onSubmitPastedOutput: (output: string) => void;
+  onSubmitScreenshot?: (fileName: string, option: QuickResultOption, userDescription?: string) => void;
   onPreviousStep: () => void;
   onSkipStep: () => void;
   canGoBack: boolean;
@@ -28,6 +30,7 @@ export const StepViewer: React.FC<StepViewerProps> = ({
   onOpenWhy,
   onSubmitQuickResult,
   onSubmitPastedOutput,
+  onSubmitScreenshot,
   onPreviousStep,
   onSkipStep,
   canGoBack,
@@ -92,6 +95,42 @@ export const StepViewer: React.FC<StepViewerProps> = ({
             <p className="why-text">{step.whyNeeded}</p>
           </div>
         </div>
+
+        {/* Visual Guidance Diagram (when step metadata specifies a visual guide) */}
+        {step.visualGuidance && (
+          <VisualGuidance visual={step.visualGuidance} selectedOS={selectedOS} />
+        )}
+
+        {/* Safety Warning Card for Disruptive Actions */}
+        {step.safety?.isDisruptive && (
+          <div
+            style={{
+              padding: '12px 16px',
+              backgroundColor: '#FFFBEB',
+              border: '1px solid #FDE68A',
+              borderRadius: '8px',
+              marginBottom: '16px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#B45309', fontWeight: 600, fontSize: '13px', marginBottom: '4px' }}>
+              <AlertTriangleIcon size={16} />
+              <span>Safety Warning: Potentially Disruptive Action</span>
+            </div>
+            <p style={{ fontSize: '13px', color: '#78350F', margin: '0 0 6px 0', lineHeight: 1.45 }}>
+              {step.safety.potentialConsequences}
+            </p>
+            {step.safety.requiresAdminPrivileges && (
+              <div style={{ fontSize: '12px', color: '#92400E', fontWeight: 500 }}>
+                • Administrator privileges required in terminal.
+              </div>
+            )}
+            {step.safety.recoveryGuidance && (
+              <div style={{ fontSize: '12px', color: '#92400E', marginTop: '4px' }}>
+                • Recovery: {step.safety.recoveryGuidance}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Discovered Configuration Banner (when gateway or IP has been discovered) */}
         {discoveredConfig.ipv4 && (
@@ -246,6 +285,7 @@ export const StepViewer: React.FC<StepViewerProps> = ({
         initialOutput={existingSubmission}
         onSubmitQuickResult={onSubmitQuickResult}
         onSubmitPastedOutput={onSubmitPastedOutput}
+        onSubmitScreenshot={onSubmitScreenshot}
       />
 
       {/* Navigation Controls */}

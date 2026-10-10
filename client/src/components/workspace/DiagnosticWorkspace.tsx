@@ -38,12 +38,16 @@ export const DiagnosticWorkspace: React.FC<DiagnosticWorkspaceProps> = ({
   const [isWhyOpen, setIsWhyOpen] = useState(false);
   const currentStep = steps[currentStepIndex] || steps[0];
 
-  const handleQuickResult = (option: QuickResultOption) => {
-    onSubmitResult(currentStep.id, 'QUICK', { option });
+  const handleQuickResult = (option: QuickResultOption, clarification?: string) => {
+    onSubmitResult(currentStep.id, 'QUICK', { option, clarification });
   };
 
   const handlePastedOutput = (output: string) => {
     onSubmitResult(currentStep.id, 'OUTPUT', { output });
+  };
+
+  const handleScreenshot = (fileName: string, option: QuickResultOption, userDescription?: string) => {
+    onSubmitResult(currentStep.id, 'SCREENSHOT', { fileName, option, userDescription });
   };
 
   return (
@@ -67,6 +71,7 @@ export const DiagnosticWorkspace: React.FC<DiagnosticWorkspaceProps> = ({
         onOpenWhy={() => setIsWhyOpen(true)}
         onSubmitQuickResult={handleQuickResult}
         onSubmitPastedOutput={handlePastedOutput}
+        onSubmitScreenshot={handleScreenshot}
         onPreviousStep={onPreviousStep}
         onSkipStep={onSkipStep}
         canGoBack={currentStepIndex > 0}

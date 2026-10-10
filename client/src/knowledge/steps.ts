@@ -42,6 +42,13 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
       summary: 'Your primary Wi-Fi or Ethernet adapter should show State "Connected" and Admin State "Enabled".',
       sampleOutput: 'Admin State    State          Type             Interface Name\n-------------------------------------------------------------------------\nEnabled        Connected      Dedicated        Wi-Fi'
     },
+    visualGuidance: {
+      type: 'device_connection',
+      title: 'Local Network Interface & Adapter Link',
+      description: 'Checks if your device network card has an active physical or wireless link with your local network.',
+      altText: 'Diagram illustrating computer interface hardware connection to network access point',
+      relatedStepId: 'step_network_adapter'
+    },
     rootCauseIdOnFailure: 'rc_no_physical_link'
   },
 
@@ -118,6 +125,16 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
       summary: 'You should receive 4 replies with low latency (under 5ms) and 0% packet loss.',
       sampleOutput: 'Pinging 192.168.1.1 with 32 bytes of data:\nReply from 192.168.1.1: bytes=32 time=1ms TTL=64\nReply from 192.168.1.1: bytes=32 time=2ms TTL=64\n\nPing statistics for 192.168.1.1:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)'
     },
+    visualGuidance: {
+      type: 'gateway_path',
+      title: 'Default Gateway (Router) Reachability Path',
+      description: 'Sends test packets to your router. Success verifies that your local home connection is working.',
+      altText: 'Diagram showing link from Computer to Local Default Gateway Router',
+      relatedStepId: 'step_gateway_ping'
+    },
+    prerequisites: {
+      requiredEvidenceKeys: ['adapter_link']
+    },
     rootCauseIdOnFailure: 'rc_gateway_unreachable'
   },
 
@@ -153,6 +170,16 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
     expectedResult: {
       summary: 'Your DNS server should resolve the hostname and return one or more IPv4/IPv6 addresses.',
       sampleOutput: 'Server:  dns.google\nAddress:  8.8.8.8\n\nNon-authoritative answer:\nName:    google.com\nAddresses:  142.250.190.46'
+    },
+    visualGuidance: {
+      type: 'dns_flow',
+      title: 'Domain Name System (DNS) Translation Flow',
+      description: 'DNS translates human-readable domain names into numerical IP addresses needed for routing.',
+      altText: 'Diagram of domain name being translated by DNS server to IP address',
+      relatedStepId: 'step_dns_lookup'
+    },
+    prerequisites: {
+      requiredEvidenceKeys: ['gateway_reachability']
     },
     rootCauseIdOnFailure: 'rc_dns_server_failure'
   },
@@ -190,6 +217,16 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
       summary: 'You should receive 4 replies with low latency (under 50ms) and 0% packet loss.',
       sampleOutput: 'Pinging 8.8.8.8 with 32 bytes of data:\nReply from 8.8.8.8: bytes=32 time=18ms TTL=117\nReply from 8.8.8.8: bytes=32 time=19ms TTL=117\n\nPing statistics for 8.8.8.8:\n    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)'
     },
+    visualGuidance: {
+      type: 'gateway_path',
+      title: 'Direct WAN Numerical IP Reachability (8.8.8.8)',
+      description: 'Tests end-to-end routing directly to the global Internet, completely bypassing DNS translation.',
+      altText: 'Diagram showing packet route through local router to public Internet IP address',
+      relatedStepId: 'step_internet_ping'
+    },
+    prerequisites: {
+      requiredEvidenceKeys: ['adapter_link', 'gateway_reachability']
+    },
     rootCauseIdOnFailure: 'rc_isp_wan_outage'
   },
 
@@ -226,6 +263,14 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
       summary: 'Your Wi-Fi interface should be in state "connected" with a signal strength above 75%.',
       sampleOutput: '    State                  : connected\n    SSID                   : HomeNetwork_5G\n    Radio type             : 802.11ax\n    Authentication         : WPA2-Personal\n    Signal                 : 88%\n    Receive rate (Mbps)    : 866'
     },
+    visualGuidance: {
+      type: 'device_connection',
+      title: 'Wi-Fi Signal & RF Transmission Link',
+      description: 'Examines wireless signal percentage and radio band stability between your device and router.',
+      altText: 'Diagram showing wireless RF signal link quality between device and access point',
+      relatedStepId: 'step_wifi_signal'
+    },
+    isIntermittentRelevant: true,
     rootCauseIdOnFailure: 'rc_wifi_weak_signal'
   },
 
@@ -262,6 +307,14 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
       summary: 'All 10 packets should return with 0% loss and steady latency (under 40ms with jitter < 15ms).',
       sampleOutput: 'Ping statistics for 8.8.8.8:\n    Packets: Sent = 10, Received = 10, Lost = 0 (0% loss),\nApproximate round trip times in milli-seconds:\n    Minimum = 16ms, Maximum = 22ms, Average = 18ms'
     },
+    visualGuidance: {
+      type: 'packet_loss_comparison',
+      title: 'Local Gateway vs External WAN Packet Comparison',
+      description: 'Comparing packet loss to your local router versus an external IP isolates local interference from ISP issues.',
+      altText: 'Diagram comparing local gateway packet loss against external destination packet loss',
+      relatedStepId: 'step_ping_latency_jitter'
+    },
+    isIntermittentRelevant: true,
     rootCauseIdOnFailure: 'rc_bufferbloat_congestion'
   },
 
@@ -335,6 +388,14 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
       sampleOutput: 'Windows IP Configuration\n\nSuccessfully flushed the DNS Resolver Cache.'
     },
     isDisruptive: false,
+    safety: {
+      isDisruptive: false,
+      requiresConfirmation: false,
+      confirmationReason: 'Resets the operating system local DNS resolver cache to remove obsolete entries.',
+      potentialConsequences: 'Subsequent lookups may take a few extra milliseconds as cache repopulates.',
+      requiresAdminPrivileges: true,
+      recoveryGuidance: 'No recovery needed. New DNS lookups will repopulate the cache automatically.'
+    },
     rootCauseIdOnFailure: 'rc_dns_cache_corruption'
   },
 
@@ -373,6 +434,15 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
     },
     isDisruptive: true,
     disruptiveWarning: 'Releasing your IP address will briefly disconnect your computer from the network for 3-5 seconds while a new lease is requested.',
+    safety: {
+      isDisruptive: true,
+      requiresConfirmation: true,
+      confirmationReason: 'Clears the current local IP assignment and requests a fresh lease from your router DHCP server.',
+      potentialConsequences: 'All active network connections and downloads will disconnect for 3-5 seconds.',
+      prerequisites: ['Active physical or wireless link to router'],
+      requiresAdminPrivileges: true,
+      recoveryGuidance: 'If an IP address is not re-acquired within 30 seconds, run "ipconfig /renew" or restart your computer.'
+    },
     rootCauseIdOnFailure: 'rc_apipa_dhcp_failure'
   },
 
@@ -483,6 +553,15 @@ export const DIAGNOSTIC_STEPS_LIBRARY: Record<string, CuratedDiagnosticStep> = {
     },
     isDisruptive: true,
     disruptiveWarning: 'Restarting your network adapter will temporarily disconnect all network traffic for approximately 5-10 seconds.',
+    safety: {
+      isDisruptive: true,
+      requiresConfirmation: true,
+      confirmationReason: 'Performs a software reset of the local network interface card to reload the driver stack.',
+      potentialConsequences: 'All network connections, video calls, and downloads will be disconnected for 5-10 seconds.',
+      prerequisites: ['Administrator privileges'],
+      requiresAdminPrivileges: true,
+      recoveryGuidance: 'If the adapter does not automatically reconnect within 30 seconds, re-enable it in Network Connections or restart your PC.'
+    },
     rootCauseIdOnFailure: 'rc_adapter_driver_glitch'
   }
 };

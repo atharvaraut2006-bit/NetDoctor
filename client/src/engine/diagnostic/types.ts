@@ -9,7 +9,7 @@ import type { DiagnosticProcedure, DiagnosticLayer, RootCauseRecord, CuratedDiag
 
 export type SessionStatus = 'IN_PROGRESS' | 'AWAITING_VERIFICATION' | 'RESOLVED' | 'STOPPED';
 
-export type EvidenceStatus = 'VERIFIED_OK' | 'FAULT_DETECTED' | 'INCONCLUSIVE';
+export type EvidenceStatus = 'VERIFIED_OK' | 'FAULT_DETECTED' | 'INCONCLUSIVE' | 'INTERMITTENT';
 
 export interface EvidenceRecord {
   key: string;
@@ -19,6 +19,10 @@ export interface EvidenceRecord {
   sourceStepId: string;
   observedAt: Date;
   status: EvidenceStatus;
+  observationIndex?: number;
+  destination?: string;
+  commandExecuted?: string;
+  isIntermittent?: boolean;
 }
 
 export interface StepSubmissionRecord {
@@ -33,6 +37,15 @@ export interface StepSubmissionRecord {
   extractedMetrics?: Record<string, any>;
 }
 
+export interface EscalationReportData {
+  escalateTo: 'ISP' | 'NETWORK_ADMIN' | 'HARDWARE_SUPPORT';
+  title: string;
+  reason: string;
+  evidenceSummary: string[];
+  technicalHandoffNotes: string[];
+  recommendedQuestions: string[];
+}
+
 export interface FinalDiagnosticReport {
   problemIdentified: string;
   categoryKey: ProblemCategoryKey;
@@ -44,10 +57,20 @@ export interface FinalDiagnosticReport {
   stepsThatFixedIt: string[];
   preventionRecommendations: string[];
   resolvedAt: Date;
+  escalation?: EscalationReportData;
 }
 
 export interface DiagnosticDecision {
-  type: 'NEXT_STEP' | 'ROOT_CAUSE_FOUND' | 'REASSESS_PATH' | 'NEED_CLARIFICATION' | 'VERIFY_RESOLUTION' | 'UNRECOGNIZED_OUTPUT';
+  type:
+    | 'NEXT_STEP'
+    | 'ROOT_CAUSE_FOUND'
+    | 'REASSESS_PATH'
+    | 'NEED_CLARIFICATION'
+    | 'VERIFY_RESOLUTION'
+    | 'UNRECOGNIZED_OUTPUT'
+    | 'UNSUPPORTED_OR_ESCALATE'
+    | 'DISRUPTIVE_CONFIRMATION_REQUIRED'
+    | 'PREREQUISITE_FAILED';
   nextStepId?: string;
   nextStepIndex?: number;
   plainReason: string;
@@ -56,6 +79,9 @@ export interface DiagnosticDecision {
   contradictionDetected?: boolean;
   contradictionWarning?: string;
   updatedRoadmap?: RoadmapStepItem[];
+  clarificationPrompt?: string;
+  clarificationOptions?: string[];
+  escalationData?: EscalationReportData;
 }
 
 export interface DiagnosticSessionState {
@@ -82,4 +108,5 @@ export interface DiagnosticSessionState {
   contradictionsDetected: string[];
   lastDecision: DiagnosticDecision | null;
   finalReport: FinalDiagnosticReport | null;
+  escalationReport?: EscalationReportData | null;
 }

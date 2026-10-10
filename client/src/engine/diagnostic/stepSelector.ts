@@ -209,4 +209,38 @@ export class StepSelector {
       stepNumber: idx + 1
     }));
   }
+
+  /**
+   * Verifies if all technical prerequisites for a step are satisfied.
+   * If a lower OSI layer has a known fault, executing higher layer tests is invalid.
+   */
+  public checkPrerequisites(
+    stepId: string,
+    evidence: EvidenceStore
+  ): {
+    satisfied: boolean;
+    passed: boolean;
+    missingKey?: string;
+    failedPrerequisite?: string;
+    reason?: string;
+  } {
+    const stepDef = DIAGNOSTIC_STEPS_LIBRARY[stepId];
+    if (!stepDef?.prerequisites?.requiredEvidenceKeys) {
+      return { satisfied: true, passed: true };
+    }
+
+    for (const key of stepDef.prerequisites.requiredEvidenceKeys) {
+      if (evidence.isFault(key)) {
+        return {
+          satisfied: false,
+          passed: false,
+          missingKey: key,
+          failedPrerequisite: key,
+          reason: `Prerequisite unsatisfied: Step "${stepDef.title}" requires layer health on "${key}", which currently reports an active fault.`
+        };
+      }
+    }
+
+    return { satisfied: true, passed: true };
+  }
 }

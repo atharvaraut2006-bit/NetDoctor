@@ -15,7 +15,9 @@ import {
   InfoIcon,
   RotateCcwIcon,
   ArrowRightIcon,
-  ServerIcon
+  ServerIcon,
+  CopyIcon,
+  CheckCheckIcon
 } from '../common/Icons';
 
 
@@ -36,6 +38,30 @@ export const ResolutionView: React.FC<ResolutionViewProps> = ({
   onStartNewDiagnosis,
   onBackToWorkspace
 }) => {
+  const [copiedHandoff, setCopiedHandoff] = React.useState(false);
+
+  const handleCopyHandoff = () => {
+    if (!finalReport?.escalation) return;
+    const content = [
+      `NetDoctor Technical Handoff Summary`,
+      `Target: ${finalReport.escalation.escalateTo}`,
+      `Subject: ${finalReport.escalation.title}`,
+      `Reason: ${finalReport.escalation.reason}`,
+      `\nVerified Test Evidence:`,
+      ...finalReport.escalation.evidenceSummary.map((e) => `- ${e}`),
+      `\nTechnical Diagnostics Notes:`,
+      ...finalReport.escalation.technicalHandoffNotes.map((n) => `- ${n}`),
+      `\nRecommended Questions for Support:`,
+      ...finalReport.escalation.recommendedQuestions.map((q) => `- ${q}`)
+    ].join('\n');
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(content);
+      setCopiedHandoff(true);
+      setTimeout(() => setCopiedHandoff(false), 2500);
+    }
+  };
+
   // 1. Verification Prompt State (When a diagnosis has been reached and user needs to test the fix)
   if (status === 'AWAITING_VERIFICATION' && identifiedRootCause) {
     return (
@@ -159,17 +185,30 @@ export const ResolutionView: React.FC<ResolutionViewProps> = ({
   return (
     <div className="resolution-container" style={{ maxWidth: '880px', margin: '0 auto', padding: '24px 16px' }}>
       {/* Final Summary Card Header */}
-      <div className="card" style={{ padding: '28px', marginBottom: '20px', borderLeft: '5px solid var(--primary-blue)' }}>
+      <div
+        className="card"
+        style={{
+          padding: '28px',
+          marginBottom: '20px',
+          borderLeft: finalReport.escalation ? '5px solid #D97706' : '5px solid var(--primary-blue)'
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <span className="badge badge-teal">Diagnosis Complete • Problem Resolved</span>
+              {finalReport.escalation ? (
+                <span className="badge" style={{ backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D' }}>
+                  Diagnosis Complete • External Escalation Required ({finalReport.escalation.escalateTo.replace('_', ' ')})
+                </span>
+              ) : (
+                <span className="badge badge-teal">Diagnosis Complete • Problem Resolved</span>
+              )}
               <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                 {new Date(finalReport.resolvedAt).toLocaleTimeString()}
               </span>
             </div>
             <h1 style={{ fontSize: '22px', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 6px 0' }}>
-              Final Network Diagnostic Report
+              {finalReport.escalation ? 'Technical Escalation & Diagnostic Report' : 'Final Network Diagnostic Report'}
             </h1>
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0 }}>
               Initial Issue: <b>"{finalReport.problemIdentified}"</b>
@@ -187,6 +226,79 @@ export const ResolutionView: React.FC<ResolutionViewProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Structured Technical Escalation Section (Phase 5) */}
+      {finalReport.escalation && (
+        <div
+          className="card"
+          style={{
+            padding: '24px',
+            marginBottom: '20px',
+            borderLeft: '5px solid #D97706',
+            backgroundColor: '#FFFBEB'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '14px' }}>
+            <div>
+              <span className="badge" style={{ backgroundColor: '#FDE68A', color: '#78350F', marginBottom: '6px', display: 'inline-block' }}>
+                Handoff Target: {finalReport.escalation.escalateTo.replace('_', ' ')}
+              </span>
+              <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#92400E', margin: 0 }}>
+                {finalReport.escalation.title}
+              </h3>
+            </div>
+
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={handleCopyHandoff}
+              style={{
+                backgroundColor: copiedHandoff ? '#ECFDF5' : '#FFFFFF',
+                borderColor: copiedHandoff ? '#059669' : '#D97706',
+                color: copiedHandoff ? '#059669' : '#92400E',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              {copiedHandoff ? <CheckCheckIcon size={14} color="#059669" /> : <CopyIcon size={14} color="#92400E" />}
+              <span>{copiedHandoff ? 'Copied Handoff Note!' : 'Copy Handoff Notes'}</span>
+            </button>
+          </div>
+
+          <p style={{ fontSize: '14px', color: '#78350F', lineHeight: 1.5, marginBottom: '16px' }}>
+            {finalReport.escalation.reason}
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+            <div style={{ padding: '16px', backgroundColor: '#FFFFFF', borderRadius: '8px', border: '1px solid #FDE68A' }}>
+              <h4 style={{ fontSize: '13.5px', fontWeight: 600, color: '#92400E', margin: '0 0 10px 0' }}>
+                Technical Handoff Notes:
+              </h4>
+              <ul style={{ paddingLeft: '18px', margin: 0 }}>
+                {finalReport.escalation.technicalHandoffNotes.map((note, idx) => (
+                  <li key={idx} style={{ fontSize: '13px', color: 'var(--text-primary)', marginBottom: '6px', lineHeight: 1.4 }}>
+                    {note}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div style={{ padding: '16px', backgroundColor: '#FFFFFF', borderRadius: '8px', border: '1px solid #FDE68A' }}>
+              <h4 style={{ fontSize: '13.5px', fontWeight: 600, color: '#92400E', margin: '0 0 10px 0' }}>
+                Questions to Ask Support:
+              </h4>
+              <ul style={{ paddingLeft: '18px', margin: 0 }}>
+                {finalReport.escalation.recommendedQuestions.map((q, idx) => (
+                  <li key={idx} style={{ fontSize: '13px', color: 'var(--text-primary)', marginBottom: '6px', lineHeight: 1.4 }}>
+                    {q}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Grid: Root Cause & What Happened */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '20px', marginBottom: '20px' }}>

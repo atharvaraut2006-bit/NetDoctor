@@ -539,4 +539,50 @@ Phase 6: Testing, Refinement & Final Polish (Edge cases, cross-platform validati
 ```
 
 ---
-*NetDoctor Technical Architecture Document — Ready for Review and Execution.*
+
+## 13. Phase 5 Implementation Specification — Advanced Diagnosis, Visual Guidance & Safety
+
+Phase 5 extends the deterministic diagnostic system with resilience mechanisms, visual aids, safety workflows, and technical escalation:
+
+### 13.1 Advanced Diagnostic Reasoning & Evidence Resilience
+- **Contradiction Detection & Historical Preservation:** Whenever a test outcome contradicts an earlier finding for the same evidence key (e.g., gateway ping passing after earlier failure), the `EvidenceStore` records both observations chronologically with timestamps, marks the record with detailed reassessment context, and prevents false conclusions.
+- **Intermittent Symptom Tracking:** When latency spikes or packet loss occur intermittently ($0\% < \text{loss} < 100\%$), the fact is flagged as `INTERMITTENT`. A single subsequent successful ping does not clear the intermittent status, avoiding premature root-cause dismissal.
+- **Lower OSI Layer Prerequisite Enforcement:** Higher-layer steps (e.g. Gateway ping at Layer 3 or DNS lookup at Layer 7) require verifiable health of lower layers (e.g., physical adapter link at Layer 1/2). If a lower layer reports `FAULT_DETECTED`, higher layer execution is blocked with actionable guidance.
+
+### 13.2 Terminal Output Interpretation Nuances
+- **Ping Timeout Clarification:** A 100% timeout on public addresses (e.g. `8.8.8.8`) is explained as packet dropping or firewall filtering along the path, rather than definitive proof that the remote host is offline.
+- **Multi-OS Output Normalization:** Multi-packet ping outputs across Windows, macOS, and Linux are parsed deterministically into structured metrics (`packetsSent`, `packetsReceived`, `lossPercentage`, `minRtt`, `avgRtt`, `isIntermittentLoss`).
+- **Unrecognized Output Fallback:** Non-command terminal outputs or corrupted pastes are caught gracefully and presented with clear re-entry instructions without redirecting or creating fabricated passes.
+
+### 13.3 Contextual Visual Guidance System
+- **Responsive SVG Vector Diagrams:** Renders embedded diagrams for key networking concepts:
+  - `gateway_path`: Visual route from client PC to local Default Gateway Router.
+  - `dns_flow`: Visual step-by-step translation of domain names to IP addresses.
+  - `packet_loss_comparison`: Comparative diagram of local router packet health vs external WAN packet loss.
+  - `device_connection`: Interface hardware connection to network access point.
+- **Accessibility:** Full SVG `role="img"` support with detailed `aria-label` and `altText` descriptions.
+
+### 13.4 Safety & Confirmation Workflow for Disruptive Actions
+- **Disruptive Action Registry:** Actions that reset network interfaces, drop TCP sockets, or flush DNS (`step_adapter_restart`, `step_ip_release_renew`, `step_dns_flush`) are explicitly tagged with `isDisruptive: true` and `StepSafetyConfig`.
+- **Pre-execution Confirmation Modal:** Displays a warning explaining:
+  1. Why the action is recommended.
+  2. Potential consequences (e.g., 5–10 second connection drop, download interruption).
+  3. Administrator privilege requirements.
+  4. Recovery and reversal instructions if connectivity is not restored.
+- **Cancellation Safety:** Cancelling leaves the diagnostic session completely intact with no side effects.
+
+### 13.5 Screenshot Upload & Validation
+- **Client-Side Validation:** Validates image files strictly against supported formats (`.png`, `.jpg`, `.jpeg`, `.webp`) and maximum file size (5MB).
+- **Graceful Error Recovery:** Rejects invalid file types and oversized captures with clear warning messages while keeping the session valid.
+- **Structured Outcome Fallback:** Accompanied by quick outcome selectors and user description inputs for verified deterministic mapping.
+
+### 13.6 Technical Escalation Reports
+- **Multi-Target Routing:** Automatically generates structured escalation reports when problems lie outside local user control:
+  - `ISP`: Verified local LAN health with unresponsive WAN transit or external packet loss.
+  - `NETWORK_ADMIN`: Local router unresponsive, subnet mismatch, or 802.1X/MAC blocking.
+  - `HARDWARE_SUPPORT`: Physical interface hardware disconnects or adapter driver lockups.
+- **Technical Handoff Notes:** Structured summary ready to copy directly into IT helpdesk tickets or ISP customer service chats.
+- **Recommended Support Questions:** Actionable questions tailored to help users communicate effectively with technicians.
+
+---
+*NetDoctor Technical Architecture Document — Phase 5 Completed and Verified.*

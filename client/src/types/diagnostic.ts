@@ -4,6 +4,7 @@
  */
 
 import type { ProblemCategoryKey } from '../engine/types';
+import type { VisualGuidanceConfig, StepSafetyConfig } from '../knowledge/types';
 
 export type OperatingSystem = 'windows' | 'macos' | 'linux' | 'other';
 
@@ -36,6 +37,8 @@ export interface DiagnosticStep {
   };
   defaultStatus: StepStatus;
   isDisruptive?: boolean;
+  safety?: StepSafetyConfig;
+  visualGuidance?: VisualGuidanceConfig;
 }
 
 export interface RoadmapStepItem {

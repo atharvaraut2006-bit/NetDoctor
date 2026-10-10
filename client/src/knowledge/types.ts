@@ -30,6 +30,37 @@ export interface StepExpectedResult {
   sampleOutput: string;
 }
 
+export type VisualGuidanceType =
+  | 'gateway_path'
+  | 'dns_flow'
+  | 'packet_loss_comparison'
+  | 'device_connection'
+  | 'disruptive_warning'
+  | 'terminal_guide';
+
+export interface VisualGuidanceConfig {
+  type: VisualGuidanceType;
+  title: string;
+  description: string;
+  altText: string;
+  relatedStepId?: string;
+}
+
+export interface StepSafetyConfig {
+  isDisruptive: boolean;
+  requiresConfirmation: boolean;
+  confirmationReason: string;
+  potentialConsequences: string;
+  prerequisites?: string[];
+  requiresAdminPrivileges?: boolean;
+  recoveryGuidance?: string;
+}
+
+export interface StepPrerequisites {
+  requiredEvidenceKeys?: string[];
+  prerequisiteStepIds?: string[];
+}
+
 export interface CuratedDiagnosticStep {
   id: string;
   stepNumber: number;
@@ -42,6 +73,10 @@ export interface CuratedDiagnosticStep {
   expectedResult: StepExpectedResult;
   isDisruptive?: boolean;
   disruptiveWarning?: string;
+  safety?: StepSafetyConfig;
+  visualGuidance?: VisualGuidanceConfig;
+  prerequisites?: StepPrerequisites;
+  isIntermittentRelevant?: boolean;
   rootCauseIdOnFailure?: string;
 }
 
@@ -73,7 +108,7 @@ export interface EvidenceRecord {
   layer: DiagnosticLayer;
   sourceStepId: string;
   observedAt: Date;
-  status: 'VERIFIED_OK' | 'FAULT_DETECTED' | 'INCONCLUSIVE';
+  status: 'VERIFIED_OK' | 'FAULT_DETECTED' | 'INCONCLUSIVE' | 'INTERMITTENT';
 }
 
 export interface RootCauseRecord {

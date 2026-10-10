@@ -5,6 +5,7 @@ import { HomeScreen } from './components/home/HomeScreen';
 import { DiagnosticWorkspace } from './components/workspace/DiagnosticWorkspace';
 import { ResolutionView } from './components/resolution/ResolutionView';
 import { Modal } from './components/common/Modal';
+import { SafetyConfirmationModal } from './components/workspace/SafetyConfirmationModal';
 
 export const AppContent: React.FC = () => {
   const {
@@ -12,6 +13,7 @@ export const AppContent: React.FC = () => {
     activeCategory,
     selectedOS,
     steps,
+    currentStep,
     roadmap,
     currentStepIndex,
     lastInterpretation,
@@ -97,18 +99,26 @@ export const AppContent: React.FC = () => {
         )}
       </main>
 
-      {/* Confirmation Modal: Disruptive Action Safety Check */}
-      <Modal
+      {/* Safety Confirmation Modal for Disruptive Actions (Phase 5) */}
+      <SafetyConfirmationModal
         isOpen={isDisruptiveModalOpen}
-        title="Disruptive Diagnostic Action"
-        message={
-          disruptiveModalWarning ||
-          'Running this step will temporarily disconnect your network interface or release IP leases. Do you want to proceed?'
+        stepTitle={currentStep?.title || 'Potentially Disruptive Action'}
+        warningMessage={disruptiveModalWarning || undefined}
+        safetyConfig={
+          currentStep?.safety || {
+            isDisruptive: true,
+            requiresConfirmation: true,
+            confirmationReason:
+              disruptiveModalWarning ||
+              'This action software-resets network adapters or clears IP cache leases.',
+            potentialConsequences:
+              disruptiveModalWarning ||
+              'Active downloads, sockets, and network connections will temporarily disconnect for 5-10 seconds.',
+            requiresAdminPrivileges: true,
+            recoveryGuidance:
+              'Network interfaces typically re-link within 15-30 seconds. If not, restart your computer.'
+          }
         }
-        confirmLabel="Continue Test"
-        cancelLabel="Cancel"
-        variant="primary"
-        iconType="warning"
         onConfirm={confirmDisruptiveAction}
         onCancel={cancelDisruptiveAction}
       />

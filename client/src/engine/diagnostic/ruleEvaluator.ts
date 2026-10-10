@@ -14,6 +14,8 @@ export interface RuleEvaluationResult {
   plainExplanation: string;
   recommendedNextStepId?: string;
   confidenceReasoning: string;
+  isIntermittent?: boolean;
+  secondaryCauses?: string[];
 }
 
 export class RuleEvaluator {
@@ -118,15 +120,28 @@ export class RuleEvaluator {
       };
     }
 
-    // 8. Bufferbloat & High Latency / Jitter Check
-    if (evidence.isFault('ping_latency_jitter') && evidence.isOk('gateway_reachability')) {
+    // 8. Bufferbloat & High Latency / Jitter / Intermittent Packet Loss Check
+    if (
+      (evidence.isFault('ping_latency_jitter') || evidence.isIntermittent('ping_latency_jitter')) &&
+      evidence.isOk('gateway_reachability')
+    ) {
+      const isIntermittent = evidence.isIntermittent('ping_latency_jitter');
       const rc = ROOT_CAUSES_LIBRARY.rc_bufferbloat_congestion;
       return {
         rootCauseFound: true,
         rootCause: rc,
         suggestedSolution: rc,
-        plainExplanation: 'Heavy network bandwidth usage or bufferbloat is introducing high latency variance and packet drops.',
-        confidenceReasoning: 'Extended ping test revealed significant jitter or latency spikes under load.'
+        plainExplanation: isIntermittent
+          ? 'Intermittent latency spikes and periodic packet drops were detected. Network conditions fluctuate rather than suffering a persistent outage.'
+          : 'Heavy network bandwidth usage or bufferbloat is introducing high latency variance and packet drops.',
+        confidenceReasoning: isIntermittent
+          ? 'Multi-sample observations confirmed intermittent jitter and packet variance under load.'
+          : 'Extended ping test revealed significant jitter or latency spikes under load.',
+        isIntermittent,
+        secondaryCauses: [
+          'Background downloads or cloud backups on other household devices',
+          'Local router buffer queue saturation (bufferbloat)'
+        ]
       };
     }
 

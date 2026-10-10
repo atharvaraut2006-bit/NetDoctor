@@ -21,7 +21,10 @@ export function parsePingOutput(raw: string): ParsedPingStats {
     };
   }
 
-  const hasPingSignatures = /(?:Pinging\s+|Ping\s+statistics|Reply\s+from|bytes\s+from|bytes\s+of\s+data|Request\s+timed\s+out|Destination\s+host\s+unreachable|Destination\s+net\s+unreachable|General\s+failure|Transmit\s+failed|could\s+not\s+find\s+host|Unknown\s+host|packets\s+transmitted|packet\s+loss|rtt\s+min\/avg\/max|round-trip\s+min\/avg\/max|time[=<]\d+\.?\d*\s*ms|TTL=\d+|ttl=\d+)/i.test(text);
+  const destinationMatch = text.match(/(?:Pinging|PING)\s+([^\s:(]+)/i);
+  const destination = destinationMatch ? destinationMatch[1].trim() : undefined;
+
+  const hasPingSignatures = /(?:Pinging\s+|PING\s+|Ping\s+statistics|Reply\s+from|bytes\s+from|bytes\s+of\s+data|Request\s+timed\s+out|Destination\s+host\s+unreachable|Destination\s+net\s+unreachable|General\s+failure|Transmit\s+failed|could\s+not\s+find\s+host|Unknown\s+host|packets\s+transmitted|packet\s+loss|rtt\s+min\/avg\/max|round-trip\s+min\/avg\/max|time[=<]\d+\.?\d*\s*ms|TTL=\d+|ttl=\d+)/i.test(text);
 
   // 1. Detect Failure Signatures
   const isTimeout =
@@ -163,10 +166,12 @@ export function parsePingOutput(raw: string): ParsedPingStats {
   }
 
   return {
+    destination,
     packetsSent,
     packetsReceived,
     packetsLost,
     lossPercentage,
+    packetLossPercent: lossPercentage,
     minRtt,
     maxRtt,
     avgRtt,
@@ -175,6 +180,7 @@ export function parsePingOutput(raw: string): ParsedPingStats {
     isTimeout,
     isUnreachable,
     isGeneralFailure,
+    isIntermittentLoss: lossPercentage > 0 && lossPercentage < 100,
     isValidOutput: true
   };
 }
